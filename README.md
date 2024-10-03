@@ -15,7 +15,7 @@ This code creates a SMEFT likelihood for EWPD (Z pole and W pole observables), t
 
 Clone with
 ```
-git clone https://github.com/hmildner2/ewpd4lhc.git
+git clone https://github.com/ewpd4lhc/ewpd4lhc.git
 cd ewpd4lhc
 ```
 
@@ -96,14 +96,14 @@ One can additionally profile parameters in the scan and plot:
 It is also possible to use the low level classes `SMcalculator` and `SMEFTlikelihood`. For example, SM predictions can be calculated like so:
 
 ```import SMcalculator
-sm_MWscheme=SMcalculator.SMcalculator(MH=125.25,mt=172.69,alphas=0.118,MZ=91.1875,MW=80.377)
-print('AFBb:',sm_MWscheme.AFBb())
-sm_MWscheme.update(MW=80.3)
-print('AFBb(MW=80.3):',sm_MWscheme.AFBb())
+sm=SMcalculator.SMcalculator(MH=125.25,mt=172.69,alphas=0.118,MZ=91.1875,MW=80.377)
+print('AFBb:',sm.AFBb())
+sm.update(MW=80.3)
+print('AFBb(MW=80.3):',sm.AFBb())
 sm_MWscheme.reset()
-print('Also AFBb:',sm_MWscheme.get('AFBb'))
-print('dAFBb/dMW:',sm_MWscheme.derivative('AFBb','MW'))
-print('All observables:', sm_MWscheme.getall())
+print('Also AFBb:',sm.get('AFBb'))
+print('dAFBb/dMW:',sm.derivative('AFBb','MW'))
+print('All observables:', sm.getall())
 ```
 
 ## More detailed description
