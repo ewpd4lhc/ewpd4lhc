@@ -1,0 +1,141 @@
+measured:
+  AFBb:
+    central: 0.0992
+    error: 0.0016
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_\text{FB}^{0,b}$
+  AFBc:
+    central: 0.0707
+    error: 0.0035
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_\text{FB}^{0,c}$
+  AFBl:
+    central: 0.0171
+    error: 0.0010
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2024, https://arxiv.org/abs/1912.02067
+    tex: $A_\text{FB}^{0,\ell}$
+  AlSLD:
+    central: 0.1513
+    error: 0.0021
+    observable: Al
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_{\ell}^\text{SLD}$
+  AlLEP:
+    central: 0.1465
+    error: 0.0033
+    observable: Al
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_{\ell}^\text{LEP}$
+  Ab:
+    central: 0.923
+    error: 0.020
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_{b}$
+  Ac:
+    central: 0.670
+    error: 0.027
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_{c}$
+  GammaZ:
+    central: 2.4955
+    error: 0.0023
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2024, https://arxiv.org/abs/1912.02067
+    tex: $\Gamma_{Z}$
+  MH:
+    central: 125.20
+    error: 0.11
+    ref: PDG 2024
+    tex: $M_{H}$
+  MW:
+    central: 80.3692
+    error: 0.0133
+    ref: PDG 2024 (without new CDF)
+    tex: $M_{W}$
+  GammaW:
+    central: 2.085
+    error: 0.042
+    ref: PDF 2022
+    tex: $\Gamma_{W}$
+  BrWhad:
+    central: 0.6741
+    error: 0.0027
+    ref: https://arxiv.org/abs/1302.3415, PDG 2024
+    tex: $B_{W}^{had}$
+  MZ:
+    central: 91.1875
+    error: 0.0021
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2024, https://arxiv.org/abs/1912.02067
+    tex: $M_{Z}$
+  Rb:
+    central: 0.21629
+    error: 0.00066
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $R_{b}$
+  Rc:
+    central: 0.1721
+    error: 0.003
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $R_{c}$
+  Rl:
+    central: 20.7666
+    error: 0.0247
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2024, https://arxiv.org/abs/1912.02067
+    tex: $R_{\ell}$
+  alphas:
+    central: 0.1184
+    error: 0.0008
+    ref: https://arxiv.org/abs/2111.09849 (FLAG 2021, recommended by https://arxiv.org/abs/2306.14784)
+    tex: $\alpha_\text{S}$
+  Deltaalpha:
+    central: 0.05903
+    error: 0.0001
+    ref: https://arxiv.org/abs/hep-ph/9803313 (314.97686e-4) plus https://arxiv.org/abs/1908.00921 (275.3e-4)
+    tex: $\Delta\alpha$
+  mt:
+    central: 172.57
+    error: 0.58
+    ref: PDG 2024 plus 0.5 GeV due to theory uncertainty of extraction
+    tex: $m_t$
+  sigmahad:
+    central: 41480.2
+    error: 32.5
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2022, https://arxiv.org/abs/1912.02067
+    tex: $\sigma^{0}_\text{had}$
+
+correlation:
+  AFBb:
+    Rb: -0.1
+    Rc: 0.04
+  AFBc:
+    AFBb: 0.15
+    Rb: 0.07
+    Rc: -0.06
+  AFBl:
+    GammaZ: 0.0033
+    MZ: 0.0549
+    Rl: -0.0560
+    sigmahad: 0.0069
+  Ataupta:
+    Aeptau: 0.012
+  GammaZ:
+    MZ: -0.0228
+  Rc:
+    Rb: -0.18
+  Rl:
+    GammaZ: 0.0037
+    MZ: 0.0332
+    sigmahad: 0.1960
+  sigmahad:
+    GammaZ: -0.3248
+    MZ: -0.0521
+  Ab:
+    Rb: -0.08
+    Rc: 0.04
+    AFBb: 0.06
+    AFBc: -0.02
+  Ac:
+    Rb: 0.04
+    Rc: -0.06
+    AFBb: 0.01
+    AFBc: 0.04
+    Ab: 0.11

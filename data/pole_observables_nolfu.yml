@@ -1,0 +1,254 @@
+measured:
+  AFBb:
+    central: 0.0992
+    error: 0.0016
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_\text{FB}^{0,b}$
+  AFBc:
+    central: 0.0707
+    error: 0.0035
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_\text{FB}^{0,c}$
+  AFBe:
+    central: 0.0145
+    error: 0.0025
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2024, https://arxiv.org/abs/1912.02067
+    tex: $A_\text{FB}^{0,\ell}$
+  AFBmu:
+    central: 0.0169
+    error: 0.0013
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2024, https://arxiv.org/abs/1912.02067
+    tex: $A_\text{FB}^{0,\ell}$
+  AFBtau:
+    central: 0.0188
+    error: 0.0017
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2024, https://arxiv.org/abs/1912.02067
+    tex: $A_\text{FB}^{0,\ell}$
+  AeSLD:
+    central: 0.1516
+    error: 0.0021
+    observable: Ae
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_{e}^\text{SLD}$
+  AmuSLD:
+    central: 0.142
+    error: 0.015
+    observable: Amu
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_{\ell}^\text{SLD}$
+  AtauSLD:
+    central: 0.136
+    error: 0.015
+    observable: Atau
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_{\ell}^\text{SLD}$
+  AeLEP:
+    central: 0.1498
+    error: 0.0049
+    observable: Ae
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_{e}^\text{LEP}$
+  AtauLEP:
+    central: 0.1439
+    error: 0.0043
+    observable: Atau
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_{\tau}^\text{LEP}$
+  Ab:
+    central: 0.923
+    error: 0.020
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_{b}$
+  Ac:
+    central: 0.670
+    error: 0.027
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $A_{c}$
+  GammaZ:
+    central: 2.4955
+    error: 0.0023
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2022, https://arxiv.org/abs/1912.02067
+    tex: $\Gamma_{Z}$
+  MH:
+    central: 125.10
+    error: 0.11
+    ref: PDG 2024
+    tex: $M_{H}$
+  MW:
+    central: 80.3692
+    error: 0.0133
+    ref: PDG 2024 (without new CDF)
+    tex: $M_{W}$
+  GammaW:
+    central: 2.085
+    error: 0.042
+    ref: PDG 2024
+    tex: $\Gamma_{W}$
+  BrWe:
+    central: 0.1071
+    error: 0.0016
+    ref: https://arxiv.org/abs/1302.3415, PDG 2024
+    tex: $B_{W}^{e}$
+  BrWmu:
+    central: 0.1063
+    error: 0.0015
+    ref: https://arxiv.org/abs/1302.3415, PDG 2024
+    tex: $B_{W}^{\mu}$
+  BrWtau:
+    central: 0.1138
+    error: 0.0021
+    ref: https://arxiv.org/abs/1302.3415, PDG 2024
+    tex: $B_{W}^{\tau}$
+  MZ:
+    central: 91.1876
+    error: 0.0021
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2024, https://arxiv.org/abs/1912.02067
+    tex: $M_{Z}$
+  Rb:
+    central: 0.21629
+    error: 0.00066
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $R_{b}$
+  Rc:
+    central: 0.1721
+    error: 0.003
+    ref: https://arxiv.org/abs/hep-ex/0509008
+    tex: $R_{c}$
+  Re:
+    central: 20.8038
+    error: 0.0497
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2024, https://arxiv.org/abs/1912.02067
+    tex: $R_{e}$
+  Rmu:
+    central: 20.7842
+    error: 0.0335
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2024, https://arxiv.org/abs/1912.02067
+    tex: $R_{\mu}$
+  Rtau:
+    central: 20.7644
+    error: 0.0448
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2024, https://arxiv.org/abs/1912.02067
+    tex: $R_{\tau}$
+  alphas:
+    central: 0.1184
+    error: 0.0008
+    ref: https://arxiv.org/abs/2111.09849 (FLAG 2021, recommended by https://arxiv.org/abs/2306.14784)
+    tex: $\alpha_\text{S}$
+  Deltaalpha:
+    central: 0.05903
+    error: 0.00009
+    ref: https://arxiv.org/abs/hep-ph/9803313 (314.97686e-4) plus https://arxiv.org/abs/1908.00921 (276.e-4) 
+    tex: $\Delta\alpha$
+  mt:
+    central: 172.57
+    error: 0.58
+    ref: PDG 2024 plus 0.5 GeV due to theory uncertainty of extraction
+    tex: $m_t$
+  sigmahad:
+    central: 41480.7
+    error: 32.5
+    ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2024, https://arxiv.org/abs/1912.02067
+    tex: $\sigma^{0}_\text{had}$
+  RWZmue:
+    central: 0.9990
+    error: 0.0042
+    ref: https://arxiv.org/pdf/2403.02133
+    tex: $R_{WZ}^{\mu/e}$
+    prediction: 1
+  RWmue:
+    central: 1.0034
+    error: 0.0063
+    ref: https://arxiv.org/abs/1608.01484, https://arxiv.org/abs/1612.03016, https://arxiv.org/abs/2201.07861 (ATLAS+CMS+LHCb combined)
+    tex: $R_{W}^{\mu/e}$
+    prediction: 1
+  RWtaue:
+    central: 0.994
+    error: 0.021
+    ref: https://arxiv.org/abs/2201.07861
+    tex: $R_{W}^{\tau/e}$
+    prediction: 1
+  RWtaumu:
+    central: 0.990
+    error: 0.011
+    ref: https://arxiv.org/abs/2007.14040, https://arxiv.org/abs/2201.07861 (ATLAS+CMS combined)
+    tex: $R_{W}^{\tau/\mu}$
+    prediction: 1
+  Rsin2thetamue:
+    central: 0.9987
+    error: 0.0016
+    ref: None
+    tex: $R^{\mu/e}_{\sin^2\theta^\ell_{\textrm{eff}}}$
+    prediction: 1
+
+correlation:
+  GammaZ:
+    MZ: -0.0238
+  sigmahad:
+    GammaZ: -0.3249
+    MZ: -0.0507
+  Re:
+    MZ: 0.0783
+    GammaZ: -0.0110
+    sigmahad: 0.1138
+  Rmu:
+    MZ: 0.0000 
+    GammaZ: 0.0079
+    Re: 0.0694
+    sigmahad: 0.1391
+  Rtau:
+    MZ: 0.0019
+    GammaZ: 0.0059
+    Re: 0.0464
+    Rmu: -0.0696
+    sigmahad: 0.0987
+  AFBe:
+    MZ: -0.0139
+    GammaZ: 0.0071
+    Re: -0.3704
+    Rmu: 0.0013
+    Rtau: 0.0029
+    sigmahad: 0.0015
+  AFBmu:
+    MZ: 0.0459
+    AFBe: -0.0242
+    GammaZ: 0.0020
+    Re: 0.0197
+    Rmu: 0.0121
+    Rtau: 0.0012
+    sigmahad: 0.0035
+  AFBtau:
+    MZ: 0.0346
+    AFBe: -0.0202
+    AFBmu: 0.0464
+    GammaZ: 0.0013
+    Re: 0.0132
+    Rmu: -0.0030
+    Rtau: 0.0093
+    sigmahad: 0.0018
+  Rc:
+    Rb: -0.18
+  AFBb:
+    Rb: -0.1
+    Rc: 0.04
+  AFBc:
+    AFBb: 0.15
+    Rb: 0.07
+    Rc: -0.06
+  Ab:
+    Rb: -0.08
+    Rc: 0.04
+    AFBb: 0.06
+    AFBc: -0.02
+  Ac:
+    Rb: 0.04
+    Rc: -0.06
+    AFBb: 0.01
+    AFBc: 0.04
+    Ab: 0.11
+  AeLEP:
+    AtauLEP: 0.012
+  BrWe:
+    BrWmu: 0.136
+    BrWtau: -0.201
+  BrWmu:
+    BrWtau: -0.122
