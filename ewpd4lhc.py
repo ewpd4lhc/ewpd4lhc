@@ -9,7 +9,7 @@ import SMcalculator
 import yaml
 from math import floor, log10
 import logging
-logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 # Allowed inputs
 SUPPORTED_ERROR_TYPES = ['covariance', 'nuispar', 'off']
