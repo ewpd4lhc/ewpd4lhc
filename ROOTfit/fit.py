@@ -207,7 +207,6 @@ def scan(pdf, data, pois, scan_ranges, nsteps, inclOffset=False, print_level=-1)
             [sr[0] + i * float(sr[1] - sr[0]) / (ns - 1) for i in range(ns)])
 
     grid = list(itertools.product(*scan_points))
-    print(scan_points)
     result = []
 
     # Check if profiling is necessary

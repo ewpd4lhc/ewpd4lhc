@@ -4,16 +4,20 @@ import numpy
 ROOT.gROOT.SetBatch(True)
 
 CANVASXSIZE = CANVASYSIZE = 1200
-CANVASMARGINS_TLBR = (0.04, 0.12, 0.12, 0.04)
+CANVASMARGINS_TLBR = (0.14, 0.12, 0.14, 0.16)
 CANVASMARGINS2D_TLBR = (0.14, 0.12, 0.14, 0.16)
+TICKS = (1,1)
 
-MAXDELTANLLSHOWN = 100
-TITLEOFFSETX = 1.0
-TITLEOFFSETY = 1.2
-TITLEOFFSETZ = None
+MAXDELTANLLSHOWN = 10
+TITLEOFFSETX = 1.2
+TITLEOFFSETY = 1.25
+TITLEOFFSETZ = 1.1
 LABELSIZE = 0.035
 TITLESIZE = 0.04
-TEXTSIZE = 0.04
+TEXTSIZE = 0.035
+
+TEXTPOS1=(0.5, 1-CANVASMARGINS_TLBR[0]-0.08)
+TEXTPOS2=(0.5, 1-CANVASMARGINS_TLBR[0]-0.14)
 
 WILSON_MAPPING = {
     'cHWB': 'c_{HWB}',
@@ -85,7 +89,7 @@ def plotProfile1D(result, name, outfile, xtitle, ytitle='#minus 2#Delta log(L)',
     c.SetLeftMargin(CANVASMARGINS_TLBR[1])
     c.SetBottomMargin(CANVASMARGINS_TLBR[2])
     c.SetRightMargin(CANVASMARGINS_TLBR[3])
-    c.SetTicks(1, 1)
+    c.SetTicks(*TICKS)
     xs = numpy.array(graph.GetX())
     ys = numpy.array(graph.GetY())
     imin = -1
@@ -103,7 +107,7 @@ def plotProfile1D(result, name, outfile, xtitle, ytitle='#minus 2#Delta log(L)',
             ymax = y
             imax = i
             x1 = xs[i]
-    print(imin, ys[:imin], xs[:imin])
+
     g_inverse1 = ROOT.TGraph(imin, ys[:imin], xs[:imin])
     g_inverse2 = ROOT.TGraph(graph.GetN()-imin, ys[imin:], xs[imin:])
     ci1 = g_inverse1.Eval(cl1), g_inverse2.Eval(cl1)
@@ -144,14 +148,14 @@ def plotProfile1D(result, name, outfile, xtitle, ytitle='#minus 2#Delta log(L)',
     err_high = abs(ci1[1]-x0)
     rnd = 2-int(math.log10(err_low/2+err_high/2))
     central = round(x0, rnd)
-    ci1text = ROOT.TLatex(0.5, 0.85, 'Best fit: {}_{{ #minus{} }}^{{ #plus{} }}'.format(
+    ci1text = ROOT.TLatex(TEXTPOS1[0], TEXTPOS1[1], 'Best fit: {}_{{ #minus{} }}^{{ #plus{} }}'.format(
         central, round(err_low, rnd), round(err_high, rnd)))
     ci1text.SetNDC()
     ci1text.SetTextSize(TEXTSIZE)
     ci1text.SetTextFont(42)
     ci1text.SetTextAlign(21)
     ci1text.Draw()
-    ci2text = ROOT.TLatex(0.5, 0.79, '95% CL: [{},{}]'.format(
+    ci2text = ROOT.TLatex(TEXTPOS2[0], TEXTPOS2[1], '95% CL: [{},{}]'.format(
         round(ci2[0], rnd), round(ci2[1], rnd)))
     ci2text.SetNDC()
     ci2text.SetTextSize(TEXTSIZE)
@@ -182,13 +186,13 @@ def plotProfile2D(result, name, outfile, xtitle, ytitle, ztitle='#minus 2#Delta 
     else:
         cl1 = 2.297
         cl2 = 5.991
-    c = ROOT.TCanvas('canvas_'+name, name, 1024, 1024)
+    c = ROOT.TCanvas('canvas_'+name, name, CANVASXSIZE,CANVASYSIZE)
     c.SetTopMargin(CANVASMARGINS2D_TLBR[0])
     c.SetLeftMargin(CANVASMARGINS2D_TLBR[1])
     c.SetBottomMargin(CANVASMARGINS2D_TLBR[2])
     c.SetRightMargin(CANVASMARGINS2D_TLBR[3])
 
-    c.SetTicks(1, 1)
+    c.SetTicks(*TICKS)
 
     graph.GetHistogram().SetTitle('')
     graph.GetHistogram().GetXaxis().SetTitle(xtitle)
@@ -213,31 +217,33 @@ def plotProfile2D(result, name, outfile, xtitle, ytitle, ztitle='#minus 2#Delta 
         stops = numpy.array([0.0, 1.00])
         ROOT.TColor.CreateGradientColorTable(2, stops, red, green, blue, 1001)
 
-        pad1 = ROOT.TPad("pad1", "", 0, 0, 1, 1)
+        pad1 = ROOT.TPad("pad1", "", 0, 0, 1, 1)        
         pad2 = ROOT.TPad("pad2", "", 0, 0, 1, 1)
         for p in pad1, pad2:
-            p.SetRightMargin(0.16)
-            p.SetTopMargin(0.12)
-            p.SetLeftMargin(0.1)
-            p.SetBottomMargin(0.12)
+            p.SetTopMargin(CANVASMARGINS2D_TLBR[0])
+            p.SetLeftMargin(CANVASMARGINS2D_TLBR[1])
+            p.SetBottomMargin(CANVASMARGINS2D_TLBR[2])
+            p.SetRightMargin(CANVASMARGINS2D_TLBR[3])
+            p.SetTicks(*TICKS)
         pad2.SetFillStyle(0)
         pad2.SetFillColor(0)
         pad2.SetFrameFillStyle(0)
         pad1.Draw()
         pad1.cd()
-        graph.GetHistogram().GetZaxis().SetRangeUser(0, 10)
+        graph.GetHistogram().GetZaxis().SetRangeUser(0, MAXDELTANLLSHOWN)
         h0 = graph.GetHistogram().Clone()
-        h0.SetContour(20)
-        h0.SetLineColor(linecolor)
-        h0.SetLineWidth(2)
-        h1 = h0.Clone()
-        h0.SetContour(10)
+        h0.SetContour(MAXDELTANLLSHOWN)
         h0.Draw('cont4z')
         pad1.Update()
         pad1.Modified()
         c.cd()
         pad2.Draw()
         pad2.cd()
+        h1 = h0.Clone()
+        h1.SetTitleSize(0,'XY')
+        h1.SetLabelSize(0,'XY')
+        h1.SetTitleSize(0)
+
     else:
         h1 = graph.GetHistogram().Clone()
         c.cd()
@@ -247,7 +253,7 @@ def plotProfile2D(result, name, outfile, xtitle, ytitle, ztitle='#minus 2#Delta 
     h1.SetLineWidth(3)
     h1.SetLineStyle(2)
     h1.Draw('same cont3')
-    h2 = graph.GetHistogram().Clone('h2')
+    h2 = h1.Clone('h2')
     h2.SetContour(1)
     h2.SetContourLevel(0, cl2)
     h2.SetLineColor(linecolor)
