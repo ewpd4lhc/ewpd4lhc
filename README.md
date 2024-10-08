@@ -93,10 +93,10 @@ One can additionally profile parameters in the scan and plot:
 ./ROOTfit/fit.py --input ROOTFILENAME.root --pois=cHu,cHd --scan=-0.5:0.5,-1:1 --float=cHj1,cHj3 --outfolder=2DscanProfiled --plot
 ```
 
-It is also possible to use the low level classes `SMcalculator` and `SMEFTlikelihood`. For example, SM predictions can be calculated like so:
+It is also possible to use the low level classes `EWPOcalculator` and `SMEFTlikelihood`. For example, SM predictions can be calculated like so:
 
 ```import SMcalculator
-sm=SMcalculator.SMcalculator(MH=125.25,mt=172.69,alphas=0.118,MZ=91.1875,MW=80.377)
+sm=SMcalculator.EWPOcalculator(MH=125.25,mt=172.69,alphas=0.118,MZ=91.1875,MW=80.377)
 print('AFBb:',sm.AFBb())
 sm.update(MW=80.3)
 print('AFBb(MW=80.3):',sm.AFBb())

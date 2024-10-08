@@ -382,11 +382,11 @@ class CalcPara:
             with open(smdata, 'r') as f:
                 data = yaml.safe_load(f)
             if MWscheme:
-                self.sm = SMcalculator.SMcalculator(input_dict={
-                                                    o: data['measured'][o]['central'] for o in SMcalculator.SMcalculatorINPUTS_MWSCHEME}, scheme='MW')
+                self.sm = SMcalculator.EWPOcalculator(input_dict={
+                                                    o: data['measured'][o]['central'] for o in SMcalculator.INPUTS_MWSCHEME}, scheme='MW')
             else:
-                self.sm = SMcalculator.SMcalculator(input_dict={
-                                                    o: data['measured'][o]['central'] for o in SMcalculator.SMcalculatorINPUTS_ALPHASCHEME}, scheme='alpha')
+                self.sm = SMcalculator.EWPOcalculator(input_dict={
+                                                    o: data['measured'][o]['central'] for o in SMcalculator.INPUTS_ALPHASCHEME}, scheme='alpha')
         else:
             self.sm = None
 

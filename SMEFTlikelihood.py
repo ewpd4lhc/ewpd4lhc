@@ -11,7 +11,7 @@ class EWPDlikelihood:
     """
     Class creating the Electroweak Precision Data (EWPD) likelihood.
 
-    This class combines SM predictions from the SM calculator class
+    This class combines SM predictions from the EWPO calculator class
     with SMEFT parametrizations to model the EWPD SMEFT likelihood.
     """
 
@@ -56,7 +56,7 @@ class EWPDlikelihood:
                         self._measurement_covariance[o1][o] *= newerr / olderr
 
         # Initialize SM predictions based on central measurement values
-        self._smpredictions = SMcalculator.SMcalculator(
+        self._smpredictions = SMcalculator.EWPOcalculator(
             input_dict=self._measurement_central, scheme=scheme)
 
         # Select observables for the likelihood calculation

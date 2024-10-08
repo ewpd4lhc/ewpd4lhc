@@ -11,23 +11,23 @@ EWPOS = ['MH', 'mt', 'alphas', 'MZ', 'Deltaalpha', 'GammaZ', 'Rl', 'Re', 'Rmu', 
          'AFBl', 'AFBe', 'AFBmu', 'AFBtau', 'AFBb', 'AFBc', 'Ab', 'Ac', 'MW', 'GammaW', 'BrWhad', 'BrWe', 'BrWmu', 'BrWtau', 'BrWl', 'sin2thetaleff']
 
 
-class SMcalculator:
+class EWPOcalculator:
     """
-    A class that calculates Standard Model (SM) predictions for electroweak precision observables (EWPOs)
+    A class that calculates Standard Model predictions for electroweak precision observables (EWPOs)
     The class supports two schemes ('MW' and 'alpha') for parameter inputs .
     It provides functionality to compute various EWPOs, their derivatives, and theory and parametric covariance.
     """
 
     def __init__(self, MH=None, mt=None, alphas=None, MZ=None, Deltaalpha=None, MW=None, input_dict=None, scheme=None):
         """
-        Initializes the SMcalculator with either a set of 5 input parameters (including one of MW or Deltaalpha)
+        Initializes the EWPOcalculator with either a set of 5 input parameters (including one of MW or Deltaalpha)
         or a dictionary of observable values (can be more than 5 but most include at least 5 inputs) + the scheme chosen.
         Units are GeV.
 
         Example usage:
-        sm = SMcalculator(MH=125.,mt=173.,alphas=0.118,MZ=91.2,MW=80.4)
+        sm = EWPOcalculator(MH=125.,mt=173.,alphas=0.118,MZ=91.2,MW=80.4)
         or
-        sm = SMcalculator(input_dict=dict_of_input_par_values,scheme='MW')
+        sm = EWPOcalculator(input_dict=dict_of_input_par_values,scheme='MW')
 
         Args:
             MH (float): Higgs mass.
@@ -74,7 +74,7 @@ class SMcalculator:
             for x in MH, mt, alphas, MZ:
                 if x is None:
                     raise Exception(
-                        "Need to give all 5 inputs (e.g.: SMcalculator(MH=125,mt=173,MW=80.4,MZ=91.2,alphas=0.118)) or dict with all 5 inputs")
+                        "Need to give all 5 inputs (e.g.: EWPOcalculator(MH=125,mt=173,MW=80.4,MZ=91.2,alphas=0.118)) or dict with all 5 inputs")
         if MW is None and Deltaalpha is None:
             raise Exception("Need to set MW or Deltaalpha")
 
@@ -111,7 +111,7 @@ class SMcalculator:
 
     def reset(self):
         """
-        Resets the SMcalculator to its original input values.
+        Resets the EWPOcalculator to its original input values.
         """
         self.update(MH=self._MH_original, mt=self._mt_original, alphas=self._alphas_original,
                     MZ=self._MZ_original, Deltaalpha=self._Deltaalpha_original, MW=self._MW_original)
