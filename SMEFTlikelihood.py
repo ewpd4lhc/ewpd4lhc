@@ -2,9 +2,8 @@ import Utils
 import SMcalculator
 
 # Supported symmetries
-SUPPORTED_INPUT_SCHEMES = ['MW', 'alpha']
-SUPPORTED_SYMMETRIES = ['top', 'topU3l', 'U35']
-LFU_SYMMETRIES = ['topU3l', 'U35']
+SUPPORTED_SYMMETRIES = ['general','top', 'topU3l', 'U35']
+LFU_SYMMETRIES = ['general','topU3l', 'U35']
 
 
 class EWPDlikelihood:
@@ -20,19 +19,19 @@ class EWPDlikelihood:
         Initialize the EWPDlikelihood object.
 
         Args:
-            scheme (str): The scheme for SM calculations and SMEFT parametrization ('alpha' or 'MW').
-            symmetry (str): Symmetry used in the model.
+            scheme (enum or str): The scheme for SM calculations and SMEFT parametrization ('alpha','MW','sin2theta','alphaMW','alphasin2theta').
+            symmetry (str): Symmetry used in the model ('general','top','topU3l','U35').
             observables (list): List of observables to consider (None for all available).
-            Lambda (float): New physics energy scale.
+            Lambda (float): New physics energy scale in TeV(!).
             d6linSource (str): Source of dimension-6 linear terms.
             d6quadSource (str): Source of dimension-6 quadratic terms.
             d8linSource (str): Source of dimension-8 linear terms.
-            datapath (str): Path to the file containin. measurement data.
-            parapath (str): Path to the SMEFT parametrization folder file.
+            datapath (str): Path to the file containing measurement data.
+            parapath (str): Path to the SMEFT parametrization folder.
             dataUpdates (dict): Optional updates to measurement data. Default is None.
         """
         # Ensure the scheme is valid
-        if not scheme in SUPPORTED_INPUT_SCHEMES:
+        if not hasattr(SMcalculator.INPUTSCHEME, scheme):
             raise Exception(f"Scheme {scheme} not supported")
 
         # Load measurement data and relevant mappings
@@ -57,7 +56,7 @@ class EWPDlikelihood:
 
         # Initialize SM predictions based on central measurement values
         self._smpredictions = SMcalculator.EWPOcalculator(
-            input_dict=self._measurement_central, scheme=scheme)
+            input_dict=self._measurement_central, scheme=getattr(SMcalculator.INPUTSCHEME, scheme))
 
         # Select observables for the likelihood calculation
         if observables is None:
