@@ -11,7 +11,7 @@ from math import floor, log10
 import logging
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 
-# Allowed inputs
+# Allowed uncertainties (add to covariance, introduce nuisance parameter, ignore)
 SUPPORTED_ERROR_TYPES = ['covariance', 'nuispar', 'off']
 
 
@@ -238,8 +238,9 @@ def readCfg(args):
 
     # Determine the input scheme for SM calculations: MW,MZ,GF or alpha,MZ,GF
     scheme = config['General']['inputscheme']
-    sminputs = SMcalculator.SMINPUTS_MWSCHEME if scheme.lower(
-    ) == 'mw' else SMcalculator.SMINPUTS_ALPHASCHEME
+    if not hasattr(SMcalculator.INPUTSCHEME, scheme):
+        raise Exception(f"Unknown scheme {scheme}")
+    sminputs = getattr(SMcalculator.INPUTSCHEME, scheme).value
 
     # Validate symmetry
     symmetry = config['SMEFT']['symmetry']

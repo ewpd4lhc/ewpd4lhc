@@ -101,6 +101,11 @@ measured:
     error: 32.5
     ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2022, https://arxiv.org/abs/1912.02067
     tex: $\sigma^{0}_\text{had}$
+  Gmu:
+    central: 1.1663788e-5
+    error:   0.0000006e-5
+    ref: PDG 2024
+    tex: $G_{\mu}$
 
 correlation:
   AFBb:

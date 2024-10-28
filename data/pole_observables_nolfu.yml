@@ -104,6 +104,11 @@ measured:
     error: 0.0021
     ref: https://arxiv.org/abs/hep-ex/0509008, PDG 2024, https://arxiv.org/abs/1912.02067
     tex: $M_{Z}$
+  Gmu:
+    central: 1.1663788e-5
+    error:   0.0000006e-5
+    ref: PDG 2024
+    tex: $G_{\mu}$
   Rb:
     central: 0.21629
     error: 0.00066
