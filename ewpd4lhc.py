@@ -2,17 +2,20 @@
 
 import configparser
 import argparse
-import LINAfit
-import SMEFTlikelihood
 import os
-import SMcalculator
 import yaml
 from math import floor, log10
+import SMcalculator
+import SMEFTlikelihood
+import Utils
+import LINAfit
 import logging
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 # Allowed uncertainties (add to covariance, introduce nuisance parameter, ignore)
 SUPPORTED_ERROR_TYPES = ['covariance', 'nuispar', 'off']
+SIN2THETAEEFF_DERIVED=['Ae','AFBe','sin2thetaeeff']
+SIN2THETALEFF_DERIVED=['Al','AFBl','sin2thetaleff']
 
 
 def main():
@@ -35,7 +38,7 @@ def main():
     parser.add_argument('--smonly', action='store_true',
                         help='no EFT parametrization', default=False)
     parser.add_argument(
-        '--decimals', help='Number of decimals stored in yaml file', default=6)
+        '--decimals', help='Number of decimals stored in yaml file', default=12)
     parser.add_argument('--norescale_root', action='store_true',
                         help='By default, measurements and predictions in root workspace are rescaled such that absolute value likelihood becomes larger, improving numerics. This turns this off.', default=False)
 
@@ -52,6 +55,19 @@ def main():
     scheme, symmetry, observables, sminputs, coefficients, Lambda, d6lin_type, d6quad_type, d8lin_type, theo_err_treatment, para_err_treatment, datapath = readCfg(
         args)
 
+    if 'sin2theta' in scheme:
+        lfu = symmetry in SMEFTlikelihood.LFU_SYMMETRIES
+        measurement_names, measurement_central, measurement_covariance, observable_mapping, fixed_prediction = Utils.load_data(datapath + '.yml')
+        sin2thetaleff,sin2thetaleff_err = determine_sin2thetaleff(measurement_names, measurement_central, measurement_covariance, observable_mapping, scheme, lfu)
+        if lfu:
+            observables=[o for o in observables if not observable_mapping[o] in SIN2THETALEFF_DERIVED]
+        else:
+            observables=[o for o in observables if not observable_mapping[o] in SIN2THETAEEFF_DERIVED]
+        dataupdates={'sin2thetaleff':{'central':sin2thetaleff,'error':sin2thetaleff_err,'prediction':'sin2thetaleff'}}
+    else:
+        dataupdates=None
+    
+
     # Initialize the EWPD likelihood object
     ewpd = SMEFTlikelihood.EWPDlikelihood(
         scheme=scheme,
@@ -62,7 +78,8 @@ def main():
         d6quadSource=d6quad_type,
         d8linSource=d8lin_type,
         datapath=datapath + '.yml',
-        parapath=datapath + '_SMEFTpara/'
+        parapath=datapath + '_SMEFTpara/',
+        dataupdates=dataupdates
     )
 
     # Return normalized observables for better numerics (not tested)
@@ -98,12 +115,9 @@ def main():
         with_theo_err=theo_err_treatment == 'covariance',
         normalized=normalize
     )
-
     # Filter Wilson coefficients based on user input
-    coefficients_d6 = [c for c in ewpd.wilson_coefficients_d6(
-    ) if coefficients is None or c in coefficients]
-    coefficients_d8 = [c for c in ewpd.wilson_coefficients_d8(
-    ) if coefficients is None or c in coefficients]
+    coefficients_d6 = [c for c in ewpd.wilson_coefficients_d6() if coefficients is None or c in coefficients]
+    coefficients_d8 = [c for c in ewpd.wilson_coefficients_d8() if coefficients is None or c in coefficients]
 
     # d6 linear, quadratic, and d8 contributions if specified
     d6lin = ewpd.d6lin(normalized=normalize) if d6lin_type != 'none' else None
@@ -166,8 +180,8 @@ def main():
 
     runSMfit(names, sminputs, meas, meas_cov, pred, smparas, smpara)
     if not args.smonly and d6lin_type is not None:
-        runSMEFTfit(names, sminputs, meas, meas_cov, full_cov, pred, smparas,
-                    smpara, smdependence_para, theoerr_para, coefficients_d6, d6lin)
+        runSMEFTfit(names, meas, meas_cov, full_cov, pred, 
+                    smdependence_para, theoerr_para, coefficients_d6, d6lin)
     printModel(out, theo_err_treatment, para_err_treatment,
                sminputs, d6lin_type, d6quad_type, d8lin_type)
 
@@ -255,23 +269,49 @@ def readCfg(args):
 
     return scheme, symmetry, observables, sminputs, coefficients, Lambda, d6lin_type, d6quad_type, d8lin_type, theo_err_treatment, para_err_treatment, datapath
 
+def determine_sin2thetaleff(measurement_names, measurement_central, measurement_covariance, observable_mapping, scheme, lfu):
+    if lfu:
+        sin2thetaleff_obs=SIN2THETALEFF_DERIVED
+    else:
+        sin2thetaleff_obs=SIN2THETAEEFF_DERIVED
+    s2t_key='s2t'
+
+    sminputs=dict(measurement_central)
+    sminputs['sin2thetaeeff']=SMcalculator.SIN2THETALEFF_DEFAULT
+    aux_sm=SMcalculator.EWPOcalculator(scheme=scheme,input_dict=sminputs)
+
+    sin2thetaleff_measurement_names = []
+    sin2thetaleff_measurement_para = {}
+    sin2thetaleff_measurement_prediction = {}
+    for obs in measurement_names:
+        if observable_mapping[obs] in sin2thetaleff_obs:
+            sin2thetaleff_measurement_names.append(obs)
+            sin2thetaleff_measurement_prediction[obs]=aux_sm.get(observable_mapping[obs])
+            sin2thetaleff_measurement_para[obs]={}
+            sin2thetaleff_measurement_para[obs][s2t_key]=aux_sm.derivative(observable_mapping[obs],'sin2thetaleff')
+
+    res, cov, param_res, para_cov = LINAfit.lina_fit(sin2thetaleff_measurement_names, measurement_central, sin2thetaleff_measurement_prediction, measurement_covariance, [s2t_key], sin2thetaleff_measurement_para)
+    sin2thetaleff=aux_sm.sin2thetaleff()+param_res[s2t_key]
+    sin2thetaleff_err=para_cov[s2t_key][s2t_key]**0.5
+    return sin2thetaleff,sin2thetaleff_err
+
 
 def printModel(out, theo_err_treatment, para_err_treatment, sminputs, d6lin_type, d6quad_type, d8lin_type):
     """
-    Prints the statistical model summary, including observable data, correlations, and error treatments.
+    Prints the statistical model summary, including observed data, correlations, and error treatments.
     """
-
+    column_width=20
     print('\n' + '*'*80)
     print('Statistical model:\n' + '='*80)
 
     # Header for the observables section
     header = 'Observable', 'Measurement', 'Prediction', 'Total Error'
-    print(''.join([str(x).ljust(14, ' ') for x in header]))
+    print(''.join([str(x).ljust(column_width, ' ') for x in header]))
     print('-'*80)
 
     # Print each observable's measurement, prediction, and error
     for o in out:
-        print(o.ljust(14, ' ') + ''.join([str(x).ljust(14, ' ') for x in (
+        print(o.ljust(column_width, ' ') + ''.join([str(x).ljust(column_width, ' ') for x in (
             out[o]['measurement'], out[o]['smprediction'], out[o]['error'])]))
 
     print('='*80)
@@ -368,32 +408,42 @@ def runSMfit(names, sminputs, meas, meas_cov, pred, smparas, smpara):
         indirect[n] = fit_res_indirect[n]
         indirect_err[n] = fit_cov_indirect[n][n]**0.5
 
+    width_const = 13
+        
     # Print the fit results
     print('Analytic SM fit results:')
     header = ['Observable', 'Direct', '  +-',
               'Fit', '  +-', 'Indirect', '  +-', 'Pull']
-    print('='*len(header)*10)
-    print(''.join([' '+x.ljust(9, ' ') for x in header]))
-    print('-'*len(header)*10)
+    print('='*len(header)*width_const)
+    print(''.join([' '+x.ljust(width_const-1, ' ') for x in header]))
+    print('-'*len(header)*width_const)
 
     for n in names:
+        exponent=5 if n=='Gmu' else 0
         if n in fit_res:
-            rnd = -int(floor(log10(exp_err[n]))) + 1
-            print(''.join([n.ljust(10, ' ')] +
-                          [('{:10.' + str(max(rnd, 0)) + 'f}').format(round(x, rnd)) if isinstance(x, float) else x.rjust(10, ' ')
+            rnd = -int(floor(log10(10**exponent*exp_err[n]))) + 1
+            print(''.join([(n+(' [10^{}]'.format(-exponent) if exponent!=0 else '')).ljust(width_const, ' ')] +
+                          [('{:'+str(width_const)+'.' + str(max(rnd, 0)) + 'f}').format(round(10**exponent*x, rnd)) if isinstance(x, float) else x.rjust(width_const, ' ')
                            for x in [meas[n], exp_err[n], fit_res[n], fit_cov[n][n]**0.5, indirect[n], indirect_err[n]]]),
                   '{:6.1f}'.format(round((fit_res[n] - meas[n]) / exp_err[n], 1)))
 
-    print('='*len(header)*10)
+    print('='*len(header)*width_const)
 
 
-def runSMEFTfit(names, sminputs, meas, meas_cov, full_cov, pred, smparas, smpara, smdependence_para, theoerr_para, coefficients_d6, d6lin):
+def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoerr_para, coefficients_d6, d6lin):
     """
     Runs the linear SMEFT fit for dimension-six operators and prints the results.
     """
 
     exp_err = {n: meas_cov[n][n]**0.5 for n in meas_cov}
 
+    # parametrize deviations from SM expectations in terms of pulls (relative to exp error), for better numerics
+    smdependence_para_pulls={}
+    for o in smdependence_para:
+        smdependence_para_pulls[o]={}
+        for inp in smdependence_para[o]:
+            smdependence_para_pulls[o][inp+'_pull']=smdependence_para[o][inp]*exp_err[inp]
+            
     print('Performing d6 EFT fits...\n')
 
     # One-at-a-time fit for each d6 coefficient
@@ -401,7 +451,7 @@ def runSMEFTfit(names, sminputs, meas, meas_cov, full_cov, pred, smparas, smpara
     for c in coefficients_d6:
         fit_res, fit_cov, params_res, params_cov, directions, blind_directions, unconstrained = LINAfit.eft_fit(
             [n for n in names if n in full_cov], meas, full_cov, pred,
-            smdependence_para, theoerr_para, d6lin, [c]
+            smdependence_para_pulls, theoerr_para, d6lin, [c]
         )
         err = params_cov[c][c]**0.5
         rnd = -int(floor(log10(err))) + 1
@@ -410,9 +460,9 @@ def runSMEFTfit(names, sminputs, meas, meas_cov, full_cov, pred, smparas, smpara
     # Multi-dimensional fit for all d6 coefficients
     fit_res, fit_cov, params_res, params_cov, directions, blind_directions, unconstrained = LINAfit.eft_fit(
         [n for n in names if n in full_cov], meas, full_cov, pred,
-        smdependence_para, theoerr_para, d6lin, coefficients_d6, doevs=True
+        smdependence_para_pulls, theoerr_para, d6lin, coefficients_d6, doevs=True
     )
-
+    
     print('\nMulti-dimensional fit (central, err, pull):')
     for ic, c in enumerate(params_res):
         err = params_cov[c][c]**0.5
@@ -424,8 +474,8 @@ def runSMEFTfit(names, sminputs, meas, meas_cov, full_cov, pred, smparas, smpara
         if directions is None:
             print('')
         else:
-            print('('+''.join(['{0:+}*{1}'.format(round(directions[ic][1][x], 2), x)
-                  for x in directions[ic][1] if abs(directions[ic][1][x]) > 0.1])+')')
+            print('('+''.join(['{0:+}*{1}'.format(round(directions[ic][1][x], 5), x)
+                  for x in directions[ic][1] if abs(directions[ic][1][x]) > 0.001])+')')
             importance = {}
             for n in names:
                 if n not in full_cov or n not in d6lin:
@@ -438,7 +488,7 @@ def runSMEFTfit(names, sminputs, meas, meas_cov, full_cov, pred, smparas, smpara
             importance = dict(
                 sorted(importance.items(), key=lambda item: abs(item[1]), reverse=True))
             print('Main observables contributing to constraint: ' +
-                  ', '.join([x for x in importance if abs(importance[x]) > 0.15**0.5]))
+                  ', '.join([x for x in importance if abs(importance[x]) > 0.1**0.5]))
 
     # Handle blind directions if present
     if blind_directions is not None:
@@ -454,7 +504,7 @@ def runSMEFTfit(names, sminputs, meas, meas_cov, full_cov, pred, smparas, smpara
             continue
         fit_res_indirect, fit_cov_indirect, params_res_indirect, params_cov_indirect, directions, blind_directions, unconstrained = LINAfit.eft_fit(
             [n for n in names if n in full_cov], meas, full_cov, pred,
-            smdependence_para, theoerr_para, d6lin, coefficients_d6,
+            smdependence_para_pulls, theoerr_para, d6lin, coefficients_d6,
             doevs=True, spectators=[n]
         )
         if n in unconstrained:

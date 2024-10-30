@@ -38,9 +38,9 @@ def main(infilename, outfolder, actual_poi_names, float_par_names, scan_range, n
         for p in pois:
             if not p.GetName() in float_par_names:
                 p.setConstant()
-
-    # Perform fit if there are actual POIs
-    if len(actual_poi_names) > 0:
+                
+    # Perform fit in case of user-defined POIs or if there are nuisance parameters
+    if len(actual_poi_names) > 0 or len(nps)>0:
         actual_pois = ROOT.RooArgSet()
         for pn in actual_poi_names:
             for p in pois:
@@ -56,7 +56,8 @@ def main(infilename, outfolder, actual_poi_names, float_par_names, scan_range, n
 
     # Perform scan over scan ranges if specified
     if len(scan_range) > 0:
-        assert len(actual_poi_names) == len(scan_range)
+        if len(actual_poi_names) != len(scan_range):
+            raise Exception("Need to give a scan range for each (or no) POI!")
 
         res = scan(pdf, data, actual_pois, scan_range, npoints)
 

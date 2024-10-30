@@ -1,10 +1,10 @@
 import Utils
-import SMcalculator
+import SMcalculator,LINAfit
+import logging
 
 # Supported symmetries
 SUPPORTED_SYMMETRIES = ['general','top', 'topU3l', 'U35']
-LFU_SYMMETRIES = ['general','topU3l', 'U35']
-
+LFU_SYMMETRIES = ['topU3l', 'U35']
 
 class EWPDlikelihood:
     """
@@ -19,7 +19,7 @@ class EWPDlikelihood:
         Initialize the EWPDlikelihood object.
 
         Args:
-            scheme (enum or str): The scheme for SM calculations and SMEFT parametrization ('alpha','MW','sin2theta','alphaMW','alphasin2theta').
+            scheme (str): The scheme for SM calculations and SMEFT parametrization ('alpha','MW','sin2theta','alphaMW','alphasin2theta').
             symmetry (str): Symmetry used in the model ('general','top','topU3l','U35').
             observables (list): List of observables to consider (None for all available).
             Lambda (float): New physics energy scale in TeV(!).
@@ -28,7 +28,7 @@ class EWPDlikelihood:
             d8linSource (str): Source of dimension-8 linear terms.
             datapath (str): Path to the file containing measurement data.
             parapath (str): Path to the SMEFT parametrization folder.
-            dataUpdates (dict): Optional updates to measurement data. Default is None.
+            dataupdates (dict): Optional updates to measurement data. Default is None.
         """
         # Ensure the scheme is valid
         if not hasattr(SMcalculator.INPUTSCHEME, scheme):
@@ -38,21 +38,9 @@ class EWPDlikelihood:
         self._all_measurement_names, self._measurement_central, self._measurement_covariance, self._observable_mapping, self._fixed_prediction = Utils.load_data(
             datapath)
 
-        # Update measurements if any provided
+        # Update measurements wrt data files if any updates provided
         if dataupdates is not None:
-            for o in dataupdates:
-                if not o in self._all_measurement_names:
-                    raise Exception(
-                        "Trying to update unknown observable {}".format(o))
-                self._measurement_central[o] = dataupdates[o][0]
-                olderr = self._measurement_covariance[o][o]
-                newerr = dataupdates[o][1]
-                self._measurement_covariance[o][o] = newerr**2
-                # Update covariance for related observables
-                for o1 in self._measurement_covariance[o]:
-                    if not o == o1:
-                        self._measurement_covariance[o][o1] *= newerr / olderr
-                        self._measurement_covariance[o1][o] *= newerr / olderr
+            self._update_measurements(dataupdates)
 
         # Initialize SM predictions based on central measurement values
         self._smpredictions = SMcalculator.EWPOcalculator(
@@ -142,7 +130,7 @@ class EWPDlikelihood:
         """
         res = {}
         for o in self.observables(incl_inputs):
-            res[o] = self._measurement_central[o]
+            res[o] = float(self._measurement_central[o])
         return self._normalize(res) if normalized else res
 
     def predicted(self, incl_inputs=False, normalized=False):
@@ -178,6 +166,7 @@ class EWPDlikelihood:
         """
         cov = self._smpredictions.covariance(self._measurement_covariance, self._observable_mapping,
                                              add_exp_err=True, add_para_err=with_para_err, add_theo_err=with_theo_err)
+
         res = {}
         for o1 in self.observables(incl_inputs):
             res[o1] = {}
@@ -188,6 +177,7 @@ class EWPDlikelihood:
             for o1 in self.observables(incl_inputs):
                 for o2 in self.observables(incl_inputs):
                     res[o1][o2] += covd8[o1][o2]
+                    
         return self._normalize_cov(res) if normalized else res
 
     def correlation(self, incl_inputs=False, with_para_err=True, with_theo_err=True, with_d8_err=False):
@@ -397,6 +387,31 @@ class EWPDlikelihood:
                     if not c in res:
                         res.append(c)
         return res
+    def _update_measurements(self,dataupdates):
+        for o in dataupdates:
+            if not 'central' in dataupdates[o]:
+                raise Exception(f"Need to give central value for data update {o}")
+            if not 'error' in dataupdates[o]:
+                raise Exception(f"Need to give error for data update {o}")
+            if not o in self._all_measurement_names:
+                self._all_measurement_names.append(o)
+                self._measurement_covariance[o] = {}
+                if not 'prediction' in dataupdates[o]:
+                    raise Exception(f"Need to give prediction for data update {o}")
+            self._measurement_central[o] = dataupdates[o]['central']
+            self._measurement_covariance[o][o] = dataupdates[o]['error']**2
+            if 'prediction' in dataupdates[o]:
+                if isinstance(dataupdates[o],(float,int)):
+                    self._fixed_prediction[o] = dataupdates[o]['prediction']
+                    self._observable_mapping[o] = o
+                else:
+                    self._fixed_prediction[o] = None
+                    self._observable_mapping[o] = dataupdates[o]['prediction']
+            # Update covariance for related observables assuming no correlation
+            for o1 in self._all_measurement_names:
+                if not o == o1:
+                    self._measurement_covariance[o][o1] = 0.
+                    self._measurement_covariance[o1][o] = 0.
 
     def _normalize(self, d):
         """
@@ -436,3 +451,4 @@ class EWPDlikelihood:
             for o2 in d[o1]:
                 res[o1][o2] = d[o1][o2] / (pred[o1] * pred[o2])
         return res
+

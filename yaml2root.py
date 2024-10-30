@@ -2,6 +2,7 @@
 
 import yaml
 import argparse
+from math import log10
 from ROOT import RooArgSet, RooArgList, RooRealVar, RooFormulaVar, TMatrixDSym, RooDataSet, RooWorkspace, RooGaussian, RooMultiVarGaussian, RooProdPdf, RooFit, TFile
 from ROOT.RooStats import ModelConfig
 
@@ -36,30 +37,29 @@ def make_workspace(outfn, yamldata, rescaling=False):
                 yamldata[o1]['error']*yamldata[o2]['error']
 
     if rescaling:
-        det = covMatrix.Determinant()
-        rescale = 1
-        for n in range(1, 10):
-            if (10**n)**(2*len(yamldata))*det > 10e10:
-                break
-            else:
-                rescale = 10**n
-        # rescaling
+        rescale={}
         for o in yamldata:
-            yamldata[o]['smprediction'] *= rescale
-            yamldata[o]['measurement'] *= rescale
-            yamldata[o]['error'] *= rescale
+            rescale[o]=10**int(round(log10(1/yamldata[o]['error'])))
+
+        for o in yamldata:
+            yamldata[o]['smprediction'] *= rescale[o]
+            yamldata[o]['measurement'] *= rescale[o]
+            yamldata[o]['error'] *= rescale[o]
             if 'theoerr' in yamldata[o]:
                 for x in yamldata[o]['theoerr']:
-                    yamldata[o]['theoerr'][x] *= rescale
+                    yamldata[o]['theoerr'][x] *= rescale[o]
             if 'd6lin' in yamldata[o]:
                 for c in yamldata[o]['d6lin']:
-                    yamldata[o]['d6lin'][c] *= rescale
+                    yamldata[o]['d6lin'][c] *= rescale[o]
             if 'd8lin' in yamldata[o]:
                 for c in yamldata[o]['d8lin']:
-                    yamldata[o]['d8lin'][c] *= rescale
+                    yamldata[o]['d8lin'][c] *= rescale[o]
             if 'd6quad' in yamldata[o]:
                 for c in yamldata[o]['d6quad']:
-                    yamldata[o]['d6quad'][c] *= rescale
+                    yamldata[o]['d6quad'][c] *= rescale[o]
+            if 'smdependence' in yamldata[o]:
+                for x in yamldata[o]['smdependence']:
+                    yamldata[o]['smdependence'][x] *= rescale[o]/rescale[x]
 
         covMatrix = TMatrixDSym(len(yamldata))
         for i1, o1 in enumerate(yamldata):
@@ -69,7 +69,6 @@ def make_workspace(outfn, yamldata, rescaling=False):
                         yamldata[o1]['error']*yamldata[o2]['error']
                     covMatrix[i2, i1] = yamldata[o1]['correlation'][o2] * \
                         yamldata[o1]['error']*yamldata[o2]['error']
-
     predictions = []
     muVec = RooArgList()
     xVec = RooArgList()
@@ -197,6 +196,11 @@ def make_workspace(outfn, yamldata, rescaling=False):
     workspace.Write()
     modelconfig.Write()
     outf.Close()
+
+    if rescaling:
+        print("In ROOT workspace, the following observables have been rescaled as follows for better numerical behaviour")
+        for o in yamldata:
+            print('{}: {}'.format(o,rescale[o]))
 
 
 def main():

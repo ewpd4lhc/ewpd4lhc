@@ -93,9 +93,6 @@ def lina_fit(names, measured, predicted, covariance, parameters, parametrization
             # Fit direction
             p = np.array(Utils.toList(params, parametrization[n]))
             pnorm = np.linalg.norm(p)
-            # I forgot why I did this :(
-            if pnorm < 1e-30:
-                continue
             # Determine which observables get contributions from blind directions
             # This is the case if normalized_param dot normalized_blind_dir >
             maxproj = 0.0
@@ -105,7 +102,6 @@ def lina_fit(names, measured, predicted, covariance, parameters, parametrization
                 maxproj = max(maxproj, abs(np.dot(p, d) / pnorm / dnorm))
             if maxproj > unconstrainedcutoff:
                 unconstrained.append(n)
-
     # Reparametrize if sensitive directions have been identified
     # In that case eigenvectors are the parameters
     if repara is not None:
@@ -118,8 +114,8 @@ def lina_fit(names, measured, predicted, covariance, parameters, parametrization
     covP = np.linalg.inv(paraT @ covI @ para)
 
     # Convert results to dictionaries
-    dparam_res = {n: r for n, r in zip(params, param_res)}
-    dpara_cov = {n: {m: covP[i][j] for j, m in enumerate(
+    dparam_res = {n: float(r) for n, r in zip(params, param_res)}
+    dpara_cov = {n: {m: float(covP[i][j]) for j, m in enumerate(
         params)} for i, n in enumerate(params)}
 
     # Post-fit residuals for observables
@@ -128,9 +124,9 @@ def lina_fit(names, measured, predicted, covariance, parameters, parametrization
     cov_postfit = para @ covP @ paraT
 
     # Post fit result (subtract residual)
-    dres = {n: m - r for n, r, m in zip(names, res, meas)}
+    dres = {n: float(m - r) for n, r, m in zip(names, res, meas)}
     # Post fit cov (create a dict from the matrix)
-    dcov = {n: {m: cov_postfit[i][j] for j, m in enumerate(
+    dcov = {n: {m: float(cov_postfit[i][j]) for j, m in enumerate(
         names)} for i, n in enumerate(names)}
 
     # If a reparametrization has been performed, information on sensitive directions is reported
