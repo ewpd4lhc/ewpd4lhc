@@ -2,12 +2,12 @@
 
 This code creates a SMEFT likelihood for EWPD (Z pole and W pole observables), taylored to the needs of the LHC collaborations.
 
-* Supports MW,MZ,GF and alpha,MZ,GF input parameter schemes
+* Supports not only the {alpha,MZ,GF} input scheme but also {MW,MZ,GF} (preferred at LHC), {alpha,MZ,MW},  {sin2theta,MZ,GF}, {alpha,MZ,sin2theta} 
 * Dynamically calculates state-of-the art SM predictions from input parameters
 * Includes of parametric and theory uncertainties as well as their correlated effect
-* Loads flexible EFT parametrizations from text fiels
-* Parametrizations with dimension-eight as well as NLO perturbative contributions are included
-* Baseline parametrization and notation is based on SMEFTsim
+* Loads flexible EFT parametrizations from text files
+* Parametrizations with dimension-eight as well as NLO perturbative contributions are included (up to 5 input parameter schemes)
+* Baseline parametrization and notation is based on SMEFTsim, with other parametrizations validated against it
 * SMEFT symmetry assumptions used in LHC interpretations are available (e.g. "top" symmetries with U(2)^3 symmetry in the quark sector)
 * Output as yaml file and Roofit workspace
 

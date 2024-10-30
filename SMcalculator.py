@@ -3,7 +3,7 @@ from math import log
 import Utils
 import numpy as np
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 class INPUTSCHEME(Enum):
@@ -1994,7 +1994,7 @@ class EWPOcalculator:
         # corresponding to MW0 and c1, c2, ... c11
         self._C_MW = (80.3779, 0.05427, 0.008931, 0.0000882, 0.000161,
                       1.070, 0.5237, 0.0679, 0.00179, 0.0000664, 0.0795, 114.9)
-        self._THEOERR_M_W = 6e-3
+        self._THEOERR_M_W = 4e-3
 
         # reference values and interpolation constants from https://arxiv.org/abs/hep-ph/0608099
         self._MH_REFOLD = 100.

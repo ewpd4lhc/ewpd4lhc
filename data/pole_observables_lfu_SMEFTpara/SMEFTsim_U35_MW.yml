@@ -20,7 +20,7 @@ GammaZ:
     cHDD*cHq1: -0.0019948
     cHDD*cHq3: 0.0030149
     cHDD*cHu: -0.0043339
-    cHDD*cll1: -0.0003214
+    cHDD*cll1: -0.0003216
     cHWB*cHWB: 0.0056303
     cHWB*cHd: 0.0030405
     cHWB*cHe: 0.0030446
@@ -89,7 +89,7 @@ Rl:
     cHDD*cHq1: -0.015493
     cHDD*cHq3: 0.064601
     cHDD*cHu: -0.047332
-    cHDD*cll1: -0.008695
+    cHDD*cll1: -0.008698
     cHWB*cHWB: -0.172611
     cHWB*cHd: 0.043096
     cHWB*cHe: -0.257502
@@ -127,7 +127,7 @@ Rl:
     cHl3*cll1: 0.081148
     cHq1*cHq1: 0.108791
     cHq1*cHq3: 0.043224
-    cHq1*cHu: 0.0
+    cHq1*cHu: -0.0
     cHq1*cll1: -0.024863
     cHq3*cHq3: 0.108791
     cHq3*cHu: 0.0
@@ -158,7 +158,7 @@ Rc:
     cHDD*cHq1: -0.0004704
     cHDD*cHq3: 0.0002064
     cHDD*cHu: -0.0009049
-    cHDD*cll1: -4.84e-05
+    cHDD*cll1: -4.83e-05
     cHWB*cHWB: 0.0002892
     cHWB*cHd: -0.0003807
     cHWB*cHe: 0.0
@@ -227,7 +227,7 @@ Rb:
     cHDD*cHq1: 0.00031238
     cHDD*cHq3: -0.00013832
     cHDD*cHu: 0.00059882
-    cHDD*cll1: 3.125e-05
+    cHDD*cll1: 3.128e-05
     cHWB*cHWB: -0.00019191
     cHWB*cHd: 0.00025183
     cHWB*cHe: 0.0
@@ -757,6 +757,75 @@ AFBc:
     cHu*cll1: 0.0005123
     cll1*cll1: 0.0
   sm: 0.1121395
+sin2thetaleff:
+  d6lin:
+    cHDD: -0.02355681
+    cHWB: -0.02522956
+    cHd: 0.0
+    cHe: -0.0168014
+    cHl1: -0.01351028
+    cHl3: -0.01351057
+    cHq1: 0.0
+    cHq3: 0.0
+    cHu: 0.0
+    cll1: 1.2e-07
+  d6quad:
+    cHDD*cHDD: -0.00035701
+    cHDD*cHWB: -0.00038239
+    cHDD*cHd: 0.0
+    cHDD*cHe: -0.00168275
+    cHDD*cHl1: 0.0012233
+    cHDD*cHl3: -0.00020477
+    cHDD*cHq1: 0.0
+    cHDD*cHq3: 0.0
+    cHDD*cHu: 0.0
+    cHDD*cll1: 0.00071406
+    cHWB*cHWB: -1.0e-08
+    cHWB*cHd: 0.0
+    cHWB*cHe: -0.00152955
+    cHWB*cHl1: 0.00152946
+    cHWB*cHl3: 1.0e-08
+    cHWB*cHq1: 0.0
+    cHWB*cHq3: 0.0
+    cHWB*cHu: 0.0
+    cHWB*cll1: 0.00076476
+    cHd*cHd: 0.0
+    cHd*cHe: 0.0
+    cHd*cHl1: 0.0
+    cHd*cHl3: 0.0
+    cHd*cHq1: 0.0
+    cHd*cHq3: 0.0
+    cHd*cHu: 0.0
+    cHd*cll1: 0.0
+    cHe*cHe: -0.00101856
+    cHe*cHl1: 0.0001995
+    cHe*cHl3: -0.00081899
+    cHe*cHq1: 0.0
+    cHe*cHq3: 0.0
+    cHe*cHu: 0.0
+    cHe*cll1: 0.0005093
+    cHl1*cHl1: 0.00081899
+    cHl1*cHl3: 0.000819
+    cHl1*cHq1: 0.0
+    cHl1*cHq3: 0.0
+    cHl1*cHu: 0.0
+    cHl1*cll1: 0.00040951
+    cHl3*cHl3: 1.0e-08
+    cHl3*cHq1: 0.0
+    cHl3*cHq3: 0.0
+    cHl3*cHu: 0.0
+    cHl3*cll1: 0.00040953
+    cHq1*cHq1: 0.0
+    cHq1*cHq3: 0.0
+    cHq1*cHu: 0.0
+    cHq1*cll1: 0.0
+    cHq3*cHq3: 0.0
+    cHq3*cHu: 0.0
+    cHq3*cll1: 0.0
+    cHu*cHu: 0.0
+    cHu*cll1: 0.0
+    cll1*cll1: -1.0e-08
+  sm: 0.22285886
 GammaW:
   d6lin:
     cHDD: 0.0
@@ -907,73 +976,5 @@ Deltaalpha:
     cHq3: 0.0
     cHu: 0.0
     cll1: 0.0628182
+  d6quad: {}
   sm: 0.0361922
-sin2thetaleff:
-  d6lin:
-    cHDD: -0.02355681
-    cHWB: -0.02522956
-    cHd: 0.0
-    cHe: -0.0168014
-    cHl1: -0.01351028
-    cHl3: -0.01351057
-    cHq1: 0.0
-    cHq3: 0.0
-    cHu: 0.0
-    cll1: 1.2e-07
-  d6quad:
-    cHDD*cHDD: -0.00035701
-    cHDD*cHWB: -0.00038239
-    cHDD*cHd: 0.0
-    cHDD*cHe: -0.00168275
-    cHDD*cHl1: 0.0012233
-    cHDD*cHl3: -0.00020477
-    cHDD*cHq1: 0.0
-    cHDD*cHq3: 0.0
-    cHDD*cHu: 0.0
-    cHDD*cll1: 0.00071406
-    cHWB*cHWB: -1.0e-08
-    cHWB*cHd: 0.0
-    cHWB*cHe: -0.00152955
-    cHWB*cHl1: 0.00152946
-    cHWB*cHl3: 1.0e-08
-    cHWB*cHq1: 0.0
-    cHWB*cHq3: 0.0
-    cHWB*cHu: 0.0
-    cHWB*cll1: 0.00076476
-    cHd*cHd: 0.0
-    cHd*cHe: 0.0
-    cHd*cHl1: 0.0
-    cHd*cHl3: 0.0
-    cHd*cHq1: 0.0
-    cHd*cHq3: 0.0
-    cHd*cHu: 0.0
-    cHd*cll1: 0.0
-    cHe*cHe: -0.00101856
-    cHe*cHl1: 0.0001995
-    cHe*cHl3: -0.00081899
-    cHe*cHq1: 0.0
-    cHe*cHq3: 0.0
-    cHe*cHu: 0.0
-    cHe*cll1: 0.0005093
-    cHl1*cHl1: 0.00081899
-    cHl1*cHl3: 0.000819
-    cHl1*cHq1: 0.0
-    cHl1*cHq3: 0.0
-    cHl1*cHu: 0.0
-    cHl1*cll1: 0.00040951
-    cHl3*cHl3: 1.0e-08
-    cHl3*cHq1: 0.0
-    cHl3*cHq3: 0.0
-    cHl3*cHu: 0.0
-    cHl3*cll1: 0.00040953
-    cHq1*cHq1: 0.0
-    cHq1*cHq3: 0.0
-    cHq1*cHu: 0.0
-    cHq1*cll1: 0.0
-    cHq3*cHq3: 0.0
-    cHq3*cHu: 0.0
-    cHq3*cll1: 0.0
-    cHu*cHu: 0.0
-    cHu*cll1: 0.0
-    cll1*cll1: -1.0e-08
-  sm: 0.22285886
