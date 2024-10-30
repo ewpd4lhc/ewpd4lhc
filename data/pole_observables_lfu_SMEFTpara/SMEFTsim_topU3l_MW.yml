@@ -26,7 +26,7 @@ GammaZ:
     cHDD*cHl1: 0.0032504
     cHDD*cHl3: 0.0020644
     cHDD*cHu: -0.0043339
-    cHDD*cll1: -0.0003214
+    cHDD*cll1: -0.0003216
     cHQ1*cHQ1: 0.0018136
     cHQ1*cHQ3: 0.0036273
     cHQ1*cHWB: 0.0010106
@@ -134,14 +134,14 @@ Rl:
     cHDD*cHl1: -0.252111
     cHDD*cHl3: -0.234717
     cHDD*cHu: -0.047332
-    cHDD*cll1: -0.008695
+    cHDD*cll1: -0.008698
     cHQ1*cHQ1: 0.021611
     cHQ1*cHQ3: 0.043224
     cHQ1*cHWB: -0.001094
     cHQ1*cHbq: 0.000183
-    cHQ1*cHd: -0.0
+    cHQ1*cHd: 0.0
     cHQ1*cHe: 0.064801
-    cHQ1*cHj1: 0.0
+    cHQ1*cHj1: -0.0
     cHQ1*cHj3: 0.0
     cHQ1*cHl1: -0.080583
     cHQ1*cHl3: -0.04381
@@ -150,9 +150,9 @@ Rl:
     cHQ3*cHQ3: 0.021611
     cHQ3*cHWB: -0.001094
     cHQ3*cHbq: 0.000183
-    cHQ3*cHd: -0.0
+    cHQ3*cHd: 0.0
     cHQ3*cHe: 0.064801
-    cHQ3*cHj1: 0.0
+    cHQ3*cHj1: -0.0
     cHQ3*cHj3: 0.0
     cHQ3*cHl1: -0.080583
     cHQ3*cHl3: -0.04381
@@ -242,7 +242,7 @@ Rc:
     cHDD*cHl1: 0.0
     cHDD*cHl3: 9.669e-05
     cHDD*cHu: -0.00090494
-    cHDD*cll1: -4.836e-05
+    cHDD*cll1: -4.834e-05
     cHQ1*cHQ1: -2.85e-05
     cHQ1*cHQ3: -5.701e-05
     cHQ1*cHWB: 3.655e-05
@@ -350,7 +350,7 @@ Rb:
     cHDD*cHl1: 0.0
     cHDD*cHl3: -6.256e-05
     cHDD*cHu: 0.00059882
-    cHDD*cll1: 3.125e-05
+    cHDD*cll1: 3.128e-05
     cHQ1*cHQ1: 0.00013013
     cHQ1*cHQ3: 0.00026031
     cHQ1*cHWB: -0.00036832
@@ -1186,6 +1186,114 @@ AFBc:
     cHu*cll1: 0.0005123
     cll1*cll1: 0.0
   sm: 0.1121395
+sin2thetaleff:
+  d6lin:
+    cHDD: -0.02355681
+    cHQ1: 0.0
+    cHQ3: 0.0
+    cHWB: -0.02522956
+    cHbq: 0.0
+    cHd: 0.0
+    cHe: -0.0168014
+    cHj1: 0.0
+    cHj3: 0.0
+    cHl1: -0.01351028
+    cHl3: -0.01351057
+    cHu: 0.0
+    cll1: 1.2e-07
+  d6quad:
+    cHDD*cHDD: -0.00035701
+    cHDD*cHQ1: 0.0
+    cHDD*cHQ3: 0.0
+    cHDD*cHWB: -0.00038239
+    cHDD*cHbq: 0.0
+    cHDD*cHd: 0.0
+    cHDD*cHe: -0.00168275
+    cHDD*cHj1: 0.0
+    cHDD*cHj3: 0.0
+    cHDD*cHl1: 0.0012233
+    cHDD*cHl3: -0.00020477
+    cHDD*cHu: 0.0
+    cHDD*cll1: 0.00071406
+    cHQ1*cHQ1: 0.0
+    cHQ1*cHQ3: 0.0
+    cHQ1*cHWB: 0.0
+    cHQ1*cHbq: 0.0
+    cHQ1*cHd: 0.0
+    cHQ1*cHe: 0.0
+    cHQ1*cHj1: 0.0
+    cHQ1*cHj3: 0.0
+    cHQ1*cHl1: 0.0
+    cHQ1*cHl3: 0.0
+    cHQ1*cHu: 0.0
+    cHQ1*cll1: 0.0
+    cHQ3*cHQ3: 0.0
+    cHQ3*cHWB: 0.0
+    cHQ3*cHbq: 0.0
+    cHQ3*cHd: 0.0
+    cHQ3*cHe: 0.0
+    cHQ3*cHj1: 0.0
+    cHQ3*cHj3: 0.0
+    cHQ3*cHl1: 0.0
+    cHQ3*cHl3: 0.0
+    cHQ3*cHu: 0.0
+    cHQ3*cll1: 0.0
+    cHWB*cHWB: -1.0e-08
+    cHWB*cHbq: 0.0
+    cHWB*cHd: 0.0
+    cHWB*cHe: -0.00152955
+    cHWB*cHj1: 0.0
+    cHWB*cHj3: 0.0
+    cHWB*cHl1: 0.00152946
+    cHWB*cHl3: 1.0e-08
+    cHWB*cHu: 0.0
+    cHWB*cll1: 0.00076476
+    cHbq*cHbq: 0.0
+    cHbq*cHd: 0.0
+    cHbq*cHe: 0.0
+    cHbq*cHj1: 0.0
+    cHbq*cHj3: 0.0
+    cHbq*cHl1: 0.0
+    cHbq*cHl3: 0.0
+    cHbq*cHu: 0.0
+    cHbq*cll1: 0.0
+    cHd*cHd: 0.0
+    cHd*cHe: 0.0
+    cHd*cHj1: 0.0
+    cHd*cHj3: 0.0
+    cHd*cHl1: 0.0
+    cHd*cHl3: 0.0
+    cHd*cHu: 0.0
+    cHd*cll1: 0.0
+    cHe*cHe: -0.00101856
+    cHe*cHj1: 0.0
+    cHe*cHj3: 0.0
+    cHe*cHl1: 0.0001995
+    cHe*cHl3: -0.00081899
+    cHe*cHu: 0.0
+    cHe*cll1: 0.0005093
+    cHj1*cHj1: 0.0
+    cHj1*cHj3: 0.0
+    cHj1*cHl1: 0.0
+    cHj1*cHl3: 0.0
+    cHj1*cHu: 0.0
+    cHj1*cll1: 0.0
+    cHj3*cHj3: 0.0
+    cHj3*cHl1: 0.0
+    cHj3*cHl3: 0.0
+    cHj3*cHu: 0.0
+    cHj3*cll1: 0.0
+    cHl1*cHl1: 0.00081899
+    cHl1*cHl3: 0.000819
+    cHl1*cHu: 0.0
+    cHl1*cll1: 0.00040951
+    cHl3*cHl3: 1.0e-08
+    cHl3*cHu: 0.0
+    cHl3*cll1: 0.00040953
+    cHu*cHu: 0.0
+    cHu*cll1: 0.0
+    cll1*cll1: -1.0e-08
+  sm: 0.22285886
 GammaW:
   d6lin:
     cHDD: 0.0
@@ -1417,112 +1525,5 @@ Deltaalpha:
     cHl3: -0.1256365
     cHu: 0.0
     cll1: 0.0628182
+  d6quad: {}
   sm: 0.0361922
-sin2thetaleff:
-  d6lin:
-    cHDD: -0.02355681
-    cHQ1: 0.0
-    cHQ3: 0.0
-    cHWB: -0.02522956
-    cHbq: 0.0
-    cHd: 0.0
-    cHe: -0.0168014
-    cHj1: 0.0
-    cHj3: 0.0
-    cHl1: -0.01351028
-    cHl3: -0.01351057
-    cHu: 0.0
-    cll1: 1.2e-07
-  d6quad:
-    cHDD*cHDD: -0.00035701
-    cHDD*cHQ1: 0.0
-    cHDD*cHQ3: 0.0
-    cHDD*cHWB: -0.00038239
-    cHDD*cHbq: 0.0
-    cHDD*cHd: 0.0
-    cHDD*cHe: -0.00168275
-    cHDD*cHj1: 0.0
-    cHDD*cHj3: 0.0
-    cHDD*cHl1: 0.0012233
-    cHDD*cHl3: -0.00020477
-    cHDD*cHu: 0.0
-    cHDD*cll1: 0.00071406
-    cHQ1*cHQ1: 0.0
-    cHQ1*cHQ3: 0.0
-    cHQ1*cHWB: 0.0
-    cHQ1*cHbq: 0.0
-    cHQ1*cHd: 0.0
-    cHQ1*cHe: 0.0
-    cHQ1*cHj1: 0.0
-    cHQ1*cHj3: 0.0
-    cHQ1*cHl1: 0.0
-    cHQ1*cHl3: 0.0
-    cHQ1*cHu: 0.0
-    cHQ1*cll1: 0.0
-    cHQ3*cHQ3: 0.0
-    cHQ3*cHWB: 0.0
-    cHQ3*cHbq: 0.0
-    cHQ3*cHd: 0.0
-    cHQ3*cHe: 0.0
-    cHQ3*cHj1: 0.0
-    cHQ3*cHj3: 0.0
-    cHQ3*cHl1: 0.0
-    cHQ3*cHl3: 0.0
-    cHQ3*cHu: 0.0
-    cHQ3*cll1: 0.0
-    cHWB*cHWB: -1.0e-08
-    cHWB*cHbq: 0.0
-    cHWB*cHd: 0.0
-    cHWB*cHe: -0.00152955
-    cHWB*cHj1: 0.0
-    cHWB*cHj3: 0.0
-    cHWB*cHl1: 0.00152946
-    cHWB*cHl3: 1.0e-08
-    cHWB*cHu: 0.0
-    cHWB*cll1: 0.00076476
-    cHbq*cHbq: 0.0
-    cHbq*cHd: 0.0
-    cHbq*cHe: 0.0
-    cHbq*cHj1: 0.0
-    cHbq*cHj3: 0.0
-    cHbq*cHl1: 0.0
-    cHbq*cHl3: 0.0
-    cHbq*cHu: 0.0
-    cHbq*cll1: 0.0
-    cHd*cHd: 0.0
-    cHd*cHe: 0.0
-    cHd*cHj1: 0.0
-    cHd*cHj3: 0.0
-    cHd*cHl1: 0.0
-    cHd*cHl3: 0.0
-    cHd*cHu: 0.0
-    cHd*cll1: 0.0
-    cHe*cHe: -0.00101856
-    cHe*cHj1: 0.0
-    cHe*cHj3: 0.0
-    cHe*cHl1: 0.0001995
-    cHe*cHl3: -0.00081899
-    cHe*cHu: 0.0
-    cHe*cll1: 0.0005093
-    cHj1*cHj1: 0.0
-    cHj1*cHj3: 0.0
-    cHj1*cHl1: 0.0
-    cHj1*cHl3: 0.0
-    cHj1*cHu: 0.0
-    cHj1*cll1: 0.0
-    cHj3*cHj3: 0.0
-    cHj3*cHl1: 0.0
-    cHj3*cHl3: 0.0
-    cHj3*cHu: 0.0
-    cHj3*cll1: 0.0
-    cHl1*cHl1: 0.00081899
-    cHl1*cHl3: 0.000819
-    cHl1*cHu: 0.0
-    cHl1*cll1: 0.00040951
-    cHl3*cHl3: 1.0e-08
-    cHl3*cHu: 0.0
-    cHl3*cll1: 0.00040953
-    cHu*cHu: 0.0
-    cHu*cll1: 0.0
-    cll1*cll1: -1.0e-08
-  sm: 0.22285886
