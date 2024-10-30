@@ -3,7 +3,7 @@ from math import log
 import Utils
 import numpy as np
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 class INPUTSCHEME(Enum):
