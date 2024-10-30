@@ -738,6 +738,7 @@ class EWPOcalculator:
         Raises:
             Exception: If the observable is not recognized or implemented.
         """
+
         obs = self._lfu_version(obs)
 
         if not obs in EWPOS:
@@ -777,7 +778,6 @@ class EWPOcalculator:
                 if m not in input_covariance[n]:
                     raise Exception(
                         "Bad covariance, missing {}:{}".format(n, m))
-
         names = input_covariance.keys()
         observable_map = {}
 
@@ -820,7 +820,7 @@ class EWPOcalculator:
                         if observable_map[n] in shift and observable_map[m] in shift:
                             covariance[n][m] += float(shift[observable_map[n]]
                                                       * shift[observable_map[m]])
-
+        # Add theory error to covariance
         if add_theo_err:
             for n in names:
                 if n not in self.inputs():
@@ -830,7 +830,6 @@ class EWPOcalculator:
                     if n not in self.inputs():
                         covariance[n][m] += self.sin2theta_theoerr(
                             observable_map[n]) * self.sin2theta_theoerr(observable_map[m])
-
         return dict(covariance)
 
     # set defaults
@@ -865,7 +864,7 @@ class EWPOcalculator:
         else:
             if not isinstance(scheme, INPUTSCHEME):
                 if hasattr(INPUTSCHEME, scheme):
-                    scheme = hasattr(INPUTSCHEME, scheme)
+                    scheme = getattr(INPUTSCHEME, scheme)
                 else:
                     raise Exception("Not a valid input scheme")
             if input_dict is not None:
@@ -966,7 +965,7 @@ class EWPOcalculator:
         self._dH_MW = log(self._MH/self._MH_REFMW)
         self._dh_MW = (self._MH/self._MH_REFMW)**2
         self._LH_old = log(self._MH/self._MH_REFOLD)
-        self._dH_old = (self._MH/self._MH_REFOLD)**2
+        self._dH_old = (self._MH/self._MH_REFOLD)
 
     # update top mass and various related parameters used in interpolation formulas
     def _update_mt(self, mt):
@@ -1333,7 +1332,7 @@ class EWPOcalculator:
         return d10/self._MZ_REFOLD
 
     def _dsin2theta_udeff_dMH(self, s0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10):
-        return (1./self._MH)*(d1+2*d2*self._LH_old+4*d3*self._LH_old**3)+(2./self._MH_REFOLD)*(2*d4*self._dH_old+d8*self._dt_old)
+        return (1./self._MH)*(d1+2*d2*self._LH_old+4*d3*self._LH_old**3)+(2*d4*self._dH_old+d8*self._dt_old)/self._MH_REFOLD
 
     def _dsin2theta_udeff_dGmu(self, s0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10):
         return self._DSIN2THETA_DGMU
@@ -1834,17 +1833,17 @@ class EWPOcalculator:
     # theory uncertainties on parameters that can also serve as input
     def _theoerr_MW(self):
         if self._scheme in (INPUTSCHEME.MW, INPUTSCHEME.alphaMW):
-            raise Exception("No theory error on MW if input")
+            return 0.
         return self._THEOERR_M_W
 
     def _s2terr_sin2thetaleff(self):
         if self._scheme in (INPUTSCHEME.sin2theta, INPUTSCHEME.alphasin2theta):
-            raise Exception("No theory error on Deltaalpha if input")
+            return 0.
         return self._THEOERR_SIN2THETA_LEFF
 
     def _theoerr_Deltaalpha(self):
         if self._scheme in (INPUTSCHEME.alpha, INPUTSCHEME.alphaMW, INPUTSCHEME.alphasin2theta):
-            raise Exception("No theory error on Deltaalpha if input")
+            return 0.
         if self._scheme == INPUTSCHEME.MW:
             return self._dDeltaalpha_dMW()*self._THEOERR_M_W
         if self._scheme == INPUTSCHEME.sin2theta:
@@ -1852,7 +1851,7 @@ class EWPOcalculator:
 
     def _theoerr_Gmu(self):
         if self._scheme in (INPUTSCHEME.alpha, INPUTSCHEME.MW, INPUTSCHEME.sin2theta):
-            raise Exception("No theory error on Gmu if input")
+            return 0.
         if self._scheme == INPUTSCHEME.alphasin2theta:
             return self._dGmu_dsin2thetaleff()*self._THEOERR_SIN2THETA_LEFF
         if self._scheme == INPUTSCHEME.alphaMW:
@@ -1860,7 +1859,7 @@ class EWPOcalculator:
 
     # common uncertainties due to sin2thetaleff theory uncertainty
     def _s2terr_Al(self):
-        return self._dAl_ds2t()*self._THEOERR_SIN2THETA_LEFF
+        return self._dAl_ds2t()*self._s2terr_sin2thetaleff()
 
     def _s2terr_Ab(self):
         return self._dAb_ds2t()*self._THEOERR_SIN2THETA_BEFF
