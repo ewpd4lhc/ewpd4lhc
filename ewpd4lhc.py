@@ -179,9 +179,16 @@ def main():
             out[o]['smdependence'][p] = round(smdependence_para[o][p], ndigits)
 
     runSMfit(names, sminputs, meas, meas_cov, pred, smparas, smpara)
+
     if not args.smonly and d6lin_type is not None:
+        eft_para_fit={}
+        for o in d6lin:
+            eft_para_fit[o]={}
+            for c in coefficients_d6:
+                eft_para_fit[o][c] = d6lin[o][c] if c in d6lin[o] else 0
         runSMEFTfit(names, meas, meas_cov, full_cov, pred, 
-                    smdependence_para, theoerr_para, coefficients_d6, d6lin)
+                    smdependence_para, theoerr_para, coefficients_d6, eft_para_fit)
+
     printModel(out, theo_err_treatment, para_err_treatment,
                sminputs, d6lin_type, d6quad_type, d8lin_type)
 
