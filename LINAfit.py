@@ -93,9 +93,6 @@ def lina_fit(names, measured, predicted, covariance, parameters, parametrization
             # Fit direction
             p = np.array(Utils.toList(params, parametrization[n]))
             pnorm = np.linalg.norm(p)
-            # I forgot why I did this :(
-            if pnorm < 1e-30:
-                continue
             # Determine which observables get contributions from blind directions
             # This is the case if normalized_param dot normalized_blind_dir >
             maxproj = 0.0
