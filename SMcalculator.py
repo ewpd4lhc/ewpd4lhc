@@ -565,10 +565,14 @@ class EWPOcalculator:
             getattr(self, '_update_' + name)(value)
 
         # Update derived values that are input to interpolation formulas
-        if self._scheme in (INPUTSCHEME.MW, INPUTSCHEME.sin2theta):
-            self._update_Deltaalpha_common(self._Deltaalpha_prediction())
-        if self._scheme in (INPUTSCHEME.alphaMW, INPUTSCHEME.alphasin2theta):
-            self._update_Gmu_common(self._Gmu_prediction())
+        if self._scheme  == INPUTSCHEME.MW:
+            self._update_Deltaalpha_common(self._Deltaalpha_from_MW())
+        elif self._scheme == INPUTSCHEME.sin2theta:
+            self._update_Deltaalpha_common(self._Deltaalpha_from_sin2thetaleff())
+        elif self._scheme == INPUTSCHEME.alphaMW:
+            self._update_Gmu_common(self._Gmu_from_MW())
+        elif self._scheme == INPUTSCHEME.alphasin2theta:
+            self._update_Gmu_common(self._Gmu_from_sin2theta())
 
     def derivative(self, obs, inp):
         """
@@ -771,7 +775,7 @@ class EWPOcalculator:
         for inp in self._SMinputs:
             if inp not in input_covariance:
                 raise Exception(
-                    "Need to provide {} in measurement covariance".format(inp))
+                    "Need to provide covariance for {}".format(inp))
 
         for n in input_covariance:
             for m in input_covariance:
@@ -840,16 +844,23 @@ class EWPOcalculator:
             if input_dict is not None:
                 raise Exception(
                     "Need to set input 'scheme' along with 'input_dict'")
-
-            if Gmu is None and alpha is None:
-                raise Exception("Need to set at least one of Gmu, Deltaalpha")
             nEWinputs = 0
             for o in Deltaalpha, Gmu, MW, sin2thetaleff:
                 if o is not None:
                     nEWinputs += 1
-            if nEWinputs != 2:
+            if nEWinputs < 1:
                 raise Exception(
-                    "Need to choose an input scheme to use defaults or set two of Gmu, Deltaalpha, MW, sin2thetaleff")
+                    "Need to select an input scheme or set two of {Gmu, Deltaalpha, MW, sin2thetaleff}")
+            elif nEWinputs < 2:
+                if Gmu is None:
+                    logging.info("Using default Gmu of",GMU_DEFAULT)
+                    Gmu = GMU_DEFAULT
+                else:
+                    raise Exception(
+                        "Need to select an input scheme or set two of {Gmu, Deltaalpha, MW, sin2thetaleff}")            
+            elif nEWinputs > 2:
+                raise Exception(
+                    "Incompatible inputs, set only two of {Gmu, Deltaalpha, MW, sin2thetaleff}")
 
             if Deltaalpha is not None and Gmu is not None:
                 scheme = INPUTSCHEME.alpha
@@ -861,6 +872,8 @@ class EWPOcalculator:
                 scheme = INPUTSCHEME.sin2theta
             if sin2thetaleff is not None and alpha is not None:
                 scheme = INPUTSCHEME.alphasin2theta
+
+            logging.info(f"Calculation in {scheme.name} scheme")
         else:
             if not isinstance(scheme, INPUTSCHEME):
                 if hasattr(INPUTSCHEME, scheme):
