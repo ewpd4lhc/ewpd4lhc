@@ -100,7 +100,7 @@ sm=SMcalculator.EWPOcalculator(MH=125.25,mt=172.69,alphas=0.118,MZ=91.1875,MW=80
 print('AFBb:',sm.AFBb())
 sm.update(MW=80.3)
 print('AFBb(MW=80.3):',sm.AFBb())
-sm_MWscheme.reset()
+sm.reset()
 print('Also AFBb:',sm.get('AFBb'))
 print('dAFBb/dMW:',sm.derivative('AFBb','MW'))
 print('All observables:', sm.getall())
