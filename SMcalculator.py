@@ -42,15 +42,15 @@ class EWPOcalculator:
 
     def __init__(self, MH=None, mt=None, alphas=None, MZ=None, Deltaalpha=None, Gmu=None, MW=None, sin2thetaleff=None, scheme=None, input_dict=None):
         """
-        Initializes the EWPOcalculator with either a set of 5 input parameters  ({MZ,Gmu,Deeltaalpha} -- with either Deeltaalpha or Gmu replaced by either MW or sin2theta)
-        or a dictionary of observable values (can be more than 5 but most include at least 5 inputs) + the scheme chosen.
-        Units are GeV.
+        Initializes the EWPOcalculator with either a set of 6 input parameters  ({MH,mt,alphas} + {MZ,Gmu,Deeltaalpha}
+        -- possibly replacing either Deeltaalpha or Gmu replaced by either MW or sin2theta) or a dictionary of the values
+        + the scheme chosen. Units are GeV.
 
         Example usage:
         sm = EWPOcalculator(MH=125.,mt=173.,alphas=0.118,MZ=91.2,MW=80.4,Gmu=1663788e-5)
         or using default values and MW scheme:
         sm = EWPOcalculator(scheme=EWPOcalculator.INPUTSCHEME.MW)
-        or using a dict
+        or using a dict (here everything but MW would be set to default)
         sm = EWPOcalculator(scheme=EWPOcalculator.INPUTSCHEME.MW,input_dict={'MW':80.4})
 
         Args:
@@ -88,17 +88,18 @@ class EWPOcalculator:
         Updates the SM parameters and interpolates new values for observables based on input changes.
 
         Args:
-            MH (float): Higgs mass.
-            mt (float): Top quark mass.
+            MH (float): Higgs mass [GeV].
+            mt (float): Top quark mass [GeV].
             alphas (float): Strong coupling constant.
-            MZ (float): Z boson mass.
+            MZ (float): Z boson mass [GeV].
             Deltaalpha (float): Electroweak alpha parameter.
-            Gmu (float): Fermi coupling from muon decay Gmu.
-            MW (float): W boson mass (optional).
+            Gmu (float): Fermi coupling from muon decay Gmu [GeV^-2].
+            MW (float): W boson mass [GeV].
             sin2thetaleff (float): Effective leptonic weak mixing angle sin^2(theta)_{l,eff}
+            input_dict (dict): A dictinary, as an alternative to setting the other args.
 
         Raises:
-            Exception: If the inputs are inconsistent or both MW and Deltaalpha are set.
+            Exception: If the inputs are inconsistent (both dict and explicit args) or not compatible with EW input scheme.
         """
         if input_dict is not None:
             if not MH is None and mt is None and alphas is None and MZ is None and Deltaalpha is None and Gmu is None and MW is None:
@@ -836,7 +837,7 @@ class EWPOcalculator:
                             observable_map[n]) * self.sin2theta_theoerr(observable_map[m])
         return dict(covariance)
 
-    # set defaults
+    # set defaults 
     def _set_input_values(self, MH, mt, alphas, MZ, Deltaalpha, Gmu, MW, sin2thetaleff, scheme, input_dict):
 
         # figure out scheme
@@ -957,7 +958,6 @@ class EWPOcalculator:
         self.update(MH, mt, alphas, MZ, Deltaalpha, Gmu, MW, sin2thetaleff)
 
     # returns the lepton flavour universal observable name (Al=Ae=Amu=Atau in the SM etc)
-
     def _lfu_version(self, obs):
         if obs in ['Ae', 'Amu', 'Atau']:
             return 'Al'
