@@ -416,11 +416,15 @@ def runSMfit(names, sminputs, meas, meas_cov, pred, smparas, smpara):
         indirect_err[n] = fit_cov_indirect[n][n]**0.5
 
     width_const = 13
-        
+
     # Print the fit results
     print('Analytic SM fit results:')
     header = ['Observable', 'Direct', '  +-',
               'Fit', '  +-', 'Indirect', '  +-', 'Pull']
+    postFitTable(width_const,header,names,meas,exp_err,fit_res,fit_cov,indirect,indirect_err)
+
+def postFitTable(width_const,header,names,meas,exp_err,fit_res,fit_cov,indirect,indirect_err):
+    
     print('='*len(header)*width_const)
     print(''.join([' '+x.ljust(width_const-1, ' ') for x in header]))
     print('-'*len(header)*width_const)
@@ -481,8 +485,8 @@ def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoer
         if directions is None:
             print('')
         else:
-            print('('+''.join(['{0:+}*{1}'.format(round(directions[ic][1][x], 5), x)
-                  for x in directions[ic][1] if abs(directions[ic][1][x]) > 0.001])+')')
+            print('('+''.join(['{0:+}*{1}'.format(round(directions[ic][1][x], 2), x)
+                               for x in directions[ic][1] if abs(directions[ic][1][x]) > 0.005])+')')
             importance = {}
             for n in names:
                 if n not in full_cov or n not in d6lin:
@@ -523,21 +527,10 @@ def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoer
 
     # Print the SMEFT fit results
     print('\nAnalytic SMEFT fit results:')
+    width_const=13
     header = ['Observable', 'Direct', '  +-',
               'Fit', '  +-', 'Indirect', '  +-', 'Pull']
-    print('='*len(header)*10)
-    print(''.join([' '+x.ljust(9, ' ') for x in header]))
-    print('-'*len(header)*10)
-
-    for n in names:
-        if n in fit_res:
-            rnd = -int(floor(log10(exp_err[n]))) + 1
-            print(''.join([n.ljust(10, ' ')] +
-                          [('{:10.' + str(max(0, rnd)) + 'f}').format(round(x, rnd)) if isinstance(x, float) else x.rjust(10, ' ')
-                           for x in [meas[n], exp_err[n], fit_res[n], fit_cov[n][n]**0.5, indirect[n], indirect_err[n]]]),
-                  '{:6.1f}'.format(round((fit_res[n] - meas[n]) / exp_err[n], 1)))
-
-    print('='*len(header)*10)
+    postFitTable(width_const,header,names,meas,exp_err,fit_res,fit_cov,indirect,indirect_err)
 
 
 if __name__ == '__main__':
