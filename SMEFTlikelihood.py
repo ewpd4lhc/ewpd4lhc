@@ -354,7 +354,7 @@ class EWPDlikelihood:
 
     def wilson_coefficients_d6(self):
         """
-        Get the list of dimension-6 Wilson coefficients.
+        Get the list of dimension-6 Wilson coefficients with non-zero impact.
 
         Returns:
             list: Wilson coefficients for dimension-6 operators.
@@ -363,11 +363,13 @@ class EWPDlikelihood:
         for o in self.observables():
             if self._d6linpara is not None:
                 for c in self._d6linpara[self._observable_mapping[o]]:
-                    if not c in res:
+                    if not c in res and self._d6linpara[self._observable_mapping[o]][c]!=0:
                         res.append(c)
             if self._d6quadpara is not None:
                 if self._observable_mapping[o] in self._d6quadpara:
                     for c2 in self._d6quadpara[self._observable_mapping[o]]:
+                        if self._d6quadpara[self._observable_mapping[o]][c2]==0:
+                            continue
                         for c in c2.split('*'):
                             if not c in res:
                                 res.append(c)
@@ -375,7 +377,7 @@ class EWPDlikelihood:
 
     def wilson_coefficients_d8(self):
         """
-        Get the list of dimension-8 Wilson coefficients.
+        Get the list of dimension-8 Wilson coefficients with non-zero impact.
 
         Returns:
             list: Wilson coefficients for dimension-8 operators.
@@ -384,9 +386,10 @@ class EWPDlikelihood:
         if self._d8linpara is not None:
             for o in self.observables():
                 for c in self._d8linpara[self._observable_mapping[o]]:
-                    if not c in res:
+                    if not c in res and self._d8linpara[self._observable_mapping[o]][c]!=0:
                         res.append(c)
         return res
+    
     def _update_measurements(self,dataupdates):
         for o in dataupdates:
             if not 'central' in dataupdates[o]:
