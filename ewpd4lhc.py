@@ -455,7 +455,7 @@ def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoer
         for inp in smdependence_para[o]:
             smdependence_para_pulls[o][inp+'_pull']=smdependence_para[o][inp]*exp_err[inp]
             
-    print('Performing d6 EFT fits...\n')
+    print('\nPerforming linear d6 EFT fits...\n')
 
     # One-at-a-time fit for each d6 coefficient
     print('One-at-a-time results:')
@@ -474,19 +474,19 @@ def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoer
         smdependence_para_pulls, theoerr_para, d6lin, coefficients_d6, doevs=True
     )
     
-    print('\nMulti-dimensional fit (central, err, pull):')
+    print('\nMulti-dimensional fit (central, err, pull):\n')
     for ic, c in enumerate(params_res):
         err = params_cov[c][c]**0.5
         rnd = -int(floor(log10(err))) + 1
         if directions is not None:
             print('Direction ', end='')
-        print(c, round(params_res[c], rnd), round(
+        print(f"{c}:", round(params_res[c], rnd), round(
             err, rnd), round(params_res[c]/err, 1), end='\t')
         if directions is None:
             print('')
         else:
-            print('('+''.join(['{0:+}*{1}'.format(round(directions[ic][1][x], 2), x)
-                               for x in directions[ic][1] if abs(directions[ic][1][x]) > 0.005])+')')
+            print('\n'+''.join(['{0:+}*{1}'.format(round(directions[ic][1][x], 3), x)
+                               for x in directions[ic][1] if abs(directions[ic][1][x]) > 0.0005]))
             importance = {}
             for n in names:
                 if n not in full_cov or n not in d6lin:
@@ -498,9 +498,9 @@ def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoer
                 importance[n] /= full_cov[n][n]**0.5
             importance = dict(
                 sorted(importance.items(), key=lambda item: abs(item[1]), reverse=True))
-            print('Main observables contributing to constraint: ' +
+            print('Mainly constrained by: ' +
                   ', '.join([x for x in importance if abs(importance[x]) > 0.1**0.5]))
-
+            print()
     # Handle blind directions if present
     if blind_directions is not None:
         for d in blind_directions:
