@@ -25,6 +25,8 @@ PARAM_CARD_NAME = 'Cards/param_card.dat'
 PARAM_CARD_DEFAULT = 'param_card_massless.dat'
 MG5_EXECUTABLE = 'bin/mg5_aMC'
 
+PARVALUE = 1e-6
+
 ZDECAYS = [
     ('e-', 'e+'), ('mu-', 'mu+'), ('ta-', 'ta+'),
     ('u', 'u~'), ('d', 'd~'), ('c', 'c~'),
@@ -57,6 +59,8 @@ MODELS = [('SMEFTsim_top_MwScheme_UFO', 'cll1221 cHDD cHd cHl111 cHl122 cHl133 c
            'cll1 cHDD cHd cHl1 cHl3 cHe cHq1 cHq3 cHu cHWB'.split(), 'MW', 'LFU'),
           ('SMEFTsim_U35_alphaScheme_UFO',
            'cll1 cHDD cHd cHl1 cHl3 cHe cHq1 cHq3 cHu cHWB'.split(), 'alpha', 'LFU'),
+          ('SMEFTsim_general_MwScheme_UFO', 'cHDD cHWB cHl1Re11 cHl1Re22 cHl1Re33 cHl3Re11 cHl3Re22 cHl3Re33 cHq1Re11 cHq1Re22 cHq1Re33 cHq3Re11 cHq3Re22 cHq3Re33 cHeRe11 cHeRe22 cHeRe33 cHuRe11 cHuRe22 cHuRe33 cHdRe11 cHdRe22 cHdRe33 cHudRe11 cHudRe22 cHudRe33 cllRe1221'.split() ,'MW', 'noLFU'),
+          ('SMEFTsim_general_alphaScheme_UFO', 'cHDD cHWB cHl1Re11 cHl1Re22 cHl1Re33 cHl3Re11 cHl3Re22 cHl3Re33 cHq1Re11 cHq1Re22 cHq1Re33 cHq3Re11 cHq3Re22 cHq3Re33 cHeRe11 cHeRe22 cHeRe33 cHuRe11 cHuRe22 cHuRe33 cHdRe11 cHdRe22 cHdRe33 cHudRe11 cHudRe22 cHudRe33 cllRe1221'.split() ,'alpha', 'noLFU'),
           ]
 
 
@@ -150,7 +154,8 @@ def rnd(r, n=6):
         cmax = 0.
         for c in r[D6LINKEY]:
             cmax = max(cmax, abs(r[D6LINKEY][c]))
-        n -= int(round(log10(cmax)))
+        if cmax>0:
+            n -= int(round(log10(cmax)))
 
     for r1 in r:
         if isinstance(r[r1], dict):
@@ -182,37 +187,54 @@ class MGrunner:
         Runs the process and manages the output for SM, linear, and quadratic results.
         """
         output = os.path.join(self.TMP_DIR, name)
+        # calculate SM value
         sm = self.run(process, output + '_sm', order=SMORDER, coefficients={},
                       nevents=nevents, model=model, restriction=restriction)
         lin = {}
         quad = {}
 
+        # calculate linear dependence on Wilson coefficients
         for c in scanpars:
             lin[c] = self.run(
                 process, output + f'_{c}_'+D6LINKEY, order=D6LINORDER,
-                coefficients={c: '1'}, nevents=nevents, model=model, restriction=restriction
-            )
+                coefficients={c: str(PARVALUE)}, nevents=nevents, model=model, restriction=restriction
+            )/PARVALUE
 
+        # calculate quadratic dependence on Wilson coefficients
         if doQuad:
+            # calculate quadratic dependence on a single Wilson coefficient
+            for c in scanpars:
+                quad[c + '*' + c] = self.run(
+                    process, output + f'_{c}_{c}_'+D6QUADKEY, order=D6QUADORDER,
+                    coefficients={c: str(PARVALUE)}, nevents=nevents, model=model, restriction=restriction
+                )/PARVALUE/PARVALUE
+            # calculate quadratic dependence on pairs of different coefficients
             for c1 in scanpars:
                 for c2 in scanpars:
-                    if c2 < c1:
+                    if c2 <= c1:
                         continue
-                    quad[c1 + '*' + c2] = self.run(
-                        process, output + f'_{c1}_{c2}_'+D6QUADKEY, order=D6QUADORDER,
-                        coefficients={c1: '1', c2: '1'}, nevents=nevents, model=model, restriction=restriction
-                    )
+                    # skip if one doesn't contribute
+                    if quad[c1 + '*' + c1] == 0 or quad[c2 + '*' + c2] == 0:
+                        quad[c1 + '*' + c2] = 0.
+                    else:
+                        quad[c1 + '*' + c2] = self.run(
+                            process, output + f'_{c1}_{c2}_'+D6QUADKEY, order=D6QUADORDER,
+                            coefficients={c1: str(PARVALUE), c2: str(PARVALUE)}, nevents=nevents, model=model, restriction=restriction
+                        )/PARVALUE/PARVALUE
+            # above did (a + b)^2, need to subtract a^2 and b^2
             for c1 in scanpars:
                 for c2 in scanpars:
                     if c1 < c2:
-                        quad[c1 + '*' + c2] = quad[c1 + '*' + c2] - \
-                            quad[c1 + '*' + c1] - quad[c2 + '*' + c2]
+                        # if either is zero they are set to zero
+                        if quad[c1 + '*' + c1] !=0 and quad[c2 + '*' + c2] != 0:
+                            quad[c1 + '*' + c2] = quad[c1 + '*' + c2] - \
+                                quad[c1 + '*' + c1] - quad[c2 + '*' + c2]
 
         return sm, lin, quad
 
     def run_all(self, doQuad=False, doZ=True, doW=True, models=None):
         """
-        Runs all processes for given models and generates output data for W and Z processes.
+        Runs all processes for given models and generates output data for W and Z partial widths.
         """
 
         if models is None:
@@ -226,39 +248,39 @@ class MGrunner:
                 if m[0] == model:
                     scanpars = m[1]
                     break
-        assert scanpars is not None
+            assert scanpars is not None
 
-        # Run W processes
-        if doW:
-            for f in self.fdoublets:
-                path = os.path.join(self.outdir, model)
-                os.makedirs(path, exist_ok=True)
-                n = f'w{f[0]}{f[1]}'
-                sm, lin, quad = self.run_process(
-                    process=f'w+ > {f[0]} {f[1]}', name=n, nevents=DEFAULT_NEVENTS, model=model,
-                    restriction=RESTRICTION, scanpars=scanpars, doQuad=doQuad
-                )
-                self.save_output(path, n, sm, lin, quad)
-
-        # Run Z processes
-        if doZ:
-            for f in self.ffbars:
-                for h in (1, -1):
-                    h0 = 'R' if h > 0 else 'L'
-                    h1 = 'R' if h < 0 else 'L'
-                    p = f'z > {f[1]}{{{h1}}} {f[0]}{{{h0}}}'
-                    n = f'Z{f[0]}{h0}'
+            # Run W processes
+            if doW:
+                for f in self.fdoublets:
                     path = os.path.join(self.outdir, model)
                     os.makedirs(path, exist_ok=True)
+                    n = f'w{f[0]}{f[1]}'
                     sm, lin, quad = self.run_process(
-                        process=p, name=n, nevents=DEFAULT_NEVENTS, model=model,
+                        process=f'w+ > {f[0]} {f[1]}', name=n, nevents=DEFAULT_NEVENTS, model=model,
                         restriction=RESTRICTION, scanpars=scanpars, doQuad=doQuad
                     )
                     self.save_output(path, n, sm, lin, quad)
 
+            # Run Z processes
+            if doZ:
+                for f in self.ffbars:
+                    for h in (1, -1):
+                        h0 = 'R' if h > 0 else 'L'
+                        h1 = 'R' if h < 0 else 'L'
+                        p = f'z > {f[1]}{{{h1}}} {f[0]}{{{h0}}}'
+                        n = f'Z{f[0]}{h0}'
+                        path = os.path.join(self.outdir, model)
+                        os.makedirs(path, exist_ok=True)
+                        sm, lin, quad = self.run_process(
+                            process=p, name=n, nevents=DEFAULT_NEVENTS, model=model,
+                            restriction=RESTRICTION, scanpars=scanpars, doQuad=doQuad
+                        )
+                        self.save_output(path, n, sm, lin, quad)
+
     def save_output(self, path, name, sm, lin, quad):
         """
-        Saves the simulation output to a YAML file.
+        Saves the output to a YAML file.
         """
         data = {SMKEY: sm, D6LINKEY: lin}
         if len(quad) > 0:
@@ -343,6 +365,7 @@ class CalcPara:
         self.gamma = {}
         self.gammaW = {}
         self.rescale = rescale
+        self.MWscheme = MWscheme
         for f in [x[0] for x in ZDECAYS]:
             for h in 'L', 'R':
                 if os.path.exists(paradir+'/Z'+f+h+'.yml'):
@@ -359,7 +382,7 @@ class CalcPara:
                     if not D6QUADKEY in self.gammaW[ff]:
                         self.gammaW[ff][D6QUADKEY] = {}
             else:
-                print('path does not exist', paradir+'/Z'+f+h+'.yml')
+                print('path does not exist', paradir+'/w'+ff+'.yml')
         if os.path.exists(paradir+'/MW.yml'):
             with open(paradir+'/MW.yml', 'r') as inf:
                 self.MWpara = yaml.safe_load(inf)
@@ -419,6 +442,14 @@ class CalcPara:
                 res[x] = k*para[x]
         return res
 
+    def GammaW_MWdependence(self):
+        para = {}
+        para[D6LINKEY] = {}
+        for c in self.MWpara[D6LINKEY]:
+            para[D6LINKEY][c] = self.MWpara[D6LINKEY][c]/self.MW()[SMKEY]
+        return para
+        
+    
     def GammaW(self, into=[''.join(x) for x in WDECAYS]):
         res = {}
         for ff in into:
@@ -437,6 +468,10 @@ class CalcPara:
                         res[x] += para[x]
                     else:
                         res[x] = para[x]
+        if not self.MWscheme:
+            dGammaW=self.GammaW_MWdependence()
+            for c in dGammaW[D6LINKEY]:
+                res[D6LINKEY][c]+=dGammaW[D6LINKEY][c]*res[SMKEY]
         return res
 
     def GammaWhad(self):
@@ -725,12 +760,12 @@ class MWalphaShifts:
             sys.path.insert(1, self.modelpath+model)
 
             result = {}
-            result[SMKEY] = self.alphaSM()/alpha0-1
+            result[SMKEY] = 1-alpha0/self.alphaSM()
             result[D6LINKEY] = {}
             result[D6QUADKEY] = {}
-            for p in split():
+            for p in par:
                 d = {}
-                for p1 in split():
+                for p1 in par:
                     d[p1] = 0
                 d[p] = 1
                 result[D6LINKEY][p] = self.alpha(d)/alpha0
@@ -752,7 +787,7 @@ class CalcParaWrapper():
         if not os.path.exists(outdir):
             os.makedirs(outdir)
 
-    def run(self, models=None):
+    def run(self, models=None,doW=True,doZ=True):
         if models is None:
             models = [m[0] for m in MODELS]
         for m in MODELS:
@@ -763,60 +798,63 @@ class CalcParaWrapper():
             lfu = m[3] == 'LFU'
             c = CalcPara(self.paradir+'/'+modelname, self.smdata,
                          rescale=self.rescale, MWscheme=MWscheme)
-
             with open(self.outdir+'/'+modelname+'.yml', 'w') as outf:
-                yaml.dump({'GammaZ': rnd(c.GammaZ())}, outf)
-                if lfu:
-                    yaml.dump({'Rl': rnd(c.R('e-'))}, outf)
-                else:
-                    yaml.dump({'Re': rnd(c.R('e-'))}, outf)
-                    yaml.dump({'Rmu': rnd(c.R('mu-'))}, outf)
-                    yaml.dump({'Rtau': rnd(c.R('ta-'))}, outf)
-                yaml.dump({'Rc': rnd(c.R('c'))}, outf)
-                yaml.dump({'Rb': rnd(c.R('b'))}, outf)
-                yaml.dump({'sigmahad': rnd(c.sigmahad())}, outf)
-                if lfu:
-                    yaml.dump({'Al': rnd(c.A('e-'))}, outf)
-                else:
-                    yaml.dump({'Ae': rnd(c.A('e-'))}, outf)
-                    yaml.dump({'Amu': rnd(c.A('mu-'))}, outf)
-                    yaml.dump({'Atau': rnd(c.A('ta-'))}, outf)
+                if doZ:
+                    yaml.dump({'GammaZ': rnd(c.GammaZ())}, outf)
+                    if lfu:
+                        yaml.dump({'Rl': rnd(c.R('e-'))}, outf)
+                    else:
+                        yaml.dump({'Re': rnd(c.R('e-'))}, outf)
+                        yaml.dump({'Rmu': rnd(c.R('mu-'))}, outf)
+                        yaml.dump({'Rtau': rnd(c.R('ta-'))}, outf)
+                    yaml.dump({'Rc': rnd(c.R('c'))}, outf)
+                    yaml.dump({'Rb': rnd(c.R('b'))}, outf)
+                    yaml.dump({'sigmahad': rnd(c.sigmahad())}, outf)
+                    if lfu:
+                        yaml.dump({'Al': rnd(c.A('e-'))}, outf)
+                    else:
+                        yaml.dump({'Ae': rnd(c.A('e-'))}, outf)
+                        yaml.dump({'Amu': rnd(c.A('mu-'))}, outf)
+                        yaml.dump({'Atau': rnd(c.A('ta-'))}, outf)
 
-                yaml.dump({'Ab': rnd(c.A('b'))}, outf)
-                yaml.dump({'Ac': rnd(c.A('c'))}, outf)
-                if lfu:
-                    yaml.dump({'AFBl': rnd(c.AFB('e-'))}, outf)
-                else:
-                    yaml.dump({'AFBe': rnd(c.AFB('e-'))}, outf)
-                    yaml.dump({'AFBmu': rnd(c.AFB('mu-'))}, outf)
-                    yaml.dump({'AFBtau': rnd(c.AFB('ta-'))}, outf)
+                    yaml.dump({'Ab': rnd(c.A('b'))}, outf)
+                    yaml.dump({'Ac': rnd(c.A('c'))}, outf)
+                    if lfu:
+                        yaml.dump({'AFBl': rnd(c.AFB('e-'))}, outf)
+                    else:
+                        yaml.dump({'AFBe': rnd(c.AFB('e-'))}, outf)
+                        yaml.dump({'AFBmu': rnd(c.AFB('mu-'))}, outf)
+                        yaml.dump({'AFBtau': rnd(c.AFB('ta-'))}, outf)
 
-                yaml.dump({'AFBb': rnd(c.AFB('b'))}, outf)
-                yaml.dump({'AFBc': rnd(c.AFB('c'))}, outf)
-                yaml.dump({'GammaW': rnd(c.GammaW())}, outf)
-                if lfu:
-                    yaml.dump({'BrWhad': rnd(c.BrWhad())}, outf)
-                else:
-                    yaml.dump({'BrWe': rnd(c.BrWe())}, outf)
-                    yaml.dump({'BrWmu': rnd(c.BrWmu())}, outf)
-                    yaml.dump({'BrWtau': rnd(c.BrWtau())}, outf)
-                if MWscheme:
-                    yaml.dump({'Deltaalpha': rnd(c.Deltaalpha())}, outf)
-                else:
-                    yaml.dump({'MW': rnd(c.MW())}, outf)
-                if not lfu:
-                    yaml.dump({'RWZmue': rnd(c.RWZmue())}, outf)
-                    yaml.dump({'RZmue': rnd(c.RZmue())}, outf)
-                    yaml.dump({'RWmue': rnd(c.RWmue())}, outf)
-                    yaml.dump({'RWtaumu': rnd(c.RWtaumu())}, outf)
-                    yaml.dump({'RWtaue': rnd(c.RWtaue())}, outf)
-                if lfu:
-                    yaml.dump({'sin2thetaleff': rnd(c.sin2thetaleff())}, outf)
-                else:
-                    yaml.dump({'sin2thetaeeff': rnd(
-                        c.sin2thetaleff('e-'))}, outf)
-                    yaml.dump({'sin2thetamueff': rnd(
-                        c.sin2thetaleff('mu-'))}, outf)
-                    yaml.dump({'sin2thetataueff': rnd(
-                        c.sin2thetaleff('ta-'))}, outf)
-                    yaml.dump({'Rsin2thetamue': rnd(c.Rsin2thetamue())}, outf)
+                    yaml.dump({'AFBb': rnd(c.AFB('b'))}, outf)
+                    yaml.dump({'AFBc': rnd(c.AFB('c'))}, outf)
+                    if lfu:
+                        yaml.dump({'sin2thetaleff': rnd(c.sin2thetaleff())}, outf)
+                    else:
+                        yaml.dump({'sin2thetaeeff': rnd(
+                            c.sin2thetaleff('e-'))}, outf)
+                        yaml.dump({'sin2thetamueff': rnd(
+                            c.sin2thetaleff('mu-'))}, outf)
+                        yaml.dump({'sin2thetataueff': rnd(
+                            c.sin2thetaleff('ta-'))}, outf)
+                        yaml.dump({'Rsin2thetamue': rnd(c.Rsin2thetamue())}, outf)
+
+                    
+                if doW:
+                    yaml.dump({'GammaW': rnd(c.GammaW())}, outf)
+                    if lfu:
+                        yaml.dump({'BrWhad': rnd(c.BrWhad())}, outf)
+                    else:
+                        yaml.dump({'BrWe': rnd(c.BrWe())}, outf)
+                        yaml.dump({'BrWmu': rnd(c.BrWmu())}, outf)
+                        yaml.dump({'BrWtau': rnd(c.BrWtau())}, outf)
+                    if MWscheme:
+                        yaml.dump({'Deltaalpha': rnd(c.Deltaalpha())}, outf)
+                    else:
+                        yaml.dump({'MW': rnd(c.MW())}, outf)
+                    if not lfu:
+                        yaml.dump({'RWZmue': rnd(c.RWZmue())}, outf)
+                        yaml.dump({'RZmue': rnd(c.RZmue())}, outf)
+                        yaml.dump({'RWmue': rnd(c.RWmue())}, outf)
+                        yaml.dump({'RWtaumu': rnd(c.RWtaumu())}, outf)
+                        yaml.dump({'RWtaue': rnd(c.RWtaue())}, outf)
