@@ -14,10 +14,11 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 # Allowed uncertainties (add to covariance, introduce nuisance parameter, ignore)
 SUPPORTED_ERROR_TYPES = ['covariance', 'nuispar', 'off']
-SIN2THETAEEFF_DERIVED=['Ae','AFBe','sin2thetaeeff']
-SIN2THETALEFF_DERIVED=['Al','AFBl','sin2thetaleff']
+SIN2THETAEEFF_DERIVED = ['Ae', 'AFBe', 'sin2thetaeeff']
+SIN2THETALEFF_DERIVED = ['Al', 'AFBl', 'sin2thetaleff']
 
 PRINTOUT_ROUNDING_LEVEL = 2
+
 
 def main():
     """
@@ -58,16 +59,20 @@ def main():
 
     if 'sin2theta' in scheme:
         lfu = symmetry in SMEFTlikelihood.LFU_SYMMETRIES
-        measurement_names, measurement_central, measurement_covariance, observable_mapping, fixed_prediction = Utils.load_data(datapath + '.yml')
-        sin2thetaleff,sin2thetaleff_err = determine_sin2thetaleff(measurement_names, measurement_central, measurement_covariance, observable_mapping, scheme, lfu)
+        measurement_names, measurement_central, measurement_covariance, observable_mapping, fixed_prediction = Utils.load_data(
+            datapath + '.yml')
+        sin2thetaleff, sin2thetaleff_err = determine_sin2thetaleff(
+            measurement_names, measurement_central, measurement_covariance, observable_mapping, scheme, lfu)
         if lfu:
-            observables=[o for o in observables if not observable_mapping[o] in SIN2THETALEFF_DERIVED]
+            observables = [
+                o for o in observables if not observable_mapping[o] in SIN2THETALEFF_DERIVED]
         else:
-            observables=[o for o in observables if not observable_mapping[o] in SIN2THETAEEFF_DERIVED]
-        dataupdates={'sin2thetaleff':{'central':sin2thetaleff,'error':sin2thetaleff_err,'prediction':'sin2thetaleff'}}
+            observables = [
+                o for o in observables if not observable_mapping[o] in SIN2THETAEEFF_DERIVED]
+        dataupdates = {'sin2thetaleff': {'central': sin2thetaleff,
+                                         'error': sin2thetaleff_err, 'prediction': 'sin2thetaleff'}}
     else:
-        dataupdates=None
-    
+        dataupdates = None
 
     # Initialize the EWPD likelihood object
     ewpd = SMEFTlikelihood.EWPDlikelihood(
@@ -117,7 +122,8 @@ def main():
         normalized=normalize
     )
     # Filter Wilson coefficients based on user input
-    coefficients_d6_lin = [c for c in ewpd.wilson_coefficients_d6(linonly=True) if coefficients is None or c in coefficients]
+    coefficients_d6_lin = [c for c in ewpd.wilson_coefficients_d6(
+        linonly=True) if coefficients is None or c in coefficients]
 
     # d6 linear, quadratic, and d8 contributions if specified
     d6lin = ewpd.d6lin(normalized=normalize) if d6lin_type != 'none' else None
@@ -181,12 +187,12 @@ def main():
     runSMfit(names, sminputs, meas, meas_cov, pred, smparas, smpara)
 
     if not args.smonly and d6lin_type is not None:
-        eft_para_fit={}
+        eft_para_fit = {}
         for o in d6lin:
-            eft_para_fit[o]={}
+            eft_para_fit[o] = {}
             for c in coefficients_d6_lin:
                 eft_para_fit[o][c] = d6lin[o][c] if c in d6lin[o] else 0
-        runSMEFTfit(names, meas, meas_cov, full_cov, pred, 
+        runSMEFTfit(names, meas, meas_cov, full_cov, pred,
                     smdependence_para, theoerr_para, coefficients_d6_lin, eft_para_fit)
 
     printModel(out, theo_err_treatment, para_err_treatment,
@@ -276,16 +282,17 @@ def readCfg(args):
 
     return scheme, symmetry, observables, sminputs, coefficients, Lambda, d6lin_type, d6quad_type, d8lin_type, theo_err_treatment, para_err_treatment, datapath
 
+
 def determine_sin2thetaleff(measurement_names, measurement_central, measurement_covariance, observable_mapping, scheme, lfu):
     if lfu:
-        sin2thetaleff_obs=SIN2THETALEFF_DERIVED
+        sin2thetaleff_obs = SIN2THETALEFF_DERIVED
     else:
-        sin2thetaleff_obs=SIN2THETAEEFF_DERIVED
-    s2t_key='s2t'
+        sin2thetaleff_obs = SIN2THETAEEFF_DERIVED
+    s2t_key = 's2t'
 
-    sminputs=dict(measurement_central)
-    sminputs['sin2thetaeeff']=SMcalculator.SIN2THETALEFF_DEFAULT
-    aux_sm=SMcalculator.EWPOcalculator(scheme=scheme,input_dict=sminputs)
+    sminputs = dict(measurement_central)
+    sminputs['sin2thetaeeff'] = SMcalculator.SIN2THETALEFF_DEFAULT
+    aux_sm = SMcalculator.EWPOcalculator(scheme=scheme, input_dict=sminputs)
 
     sin2thetaleff_measurement_names = []
     sin2thetaleff_measurement_para = {}
@@ -293,21 +300,24 @@ def determine_sin2thetaleff(measurement_names, measurement_central, measurement_
     for obs in measurement_names:
         if observable_mapping[obs] in sin2thetaleff_obs:
             sin2thetaleff_measurement_names.append(obs)
-            sin2thetaleff_measurement_prediction[obs]=aux_sm.get(observable_mapping[obs])
-            sin2thetaleff_measurement_para[obs]={}
-            sin2thetaleff_measurement_para[obs][s2t_key]=aux_sm.derivative(observable_mapping[obs],'sin2thetaleff')
+            sin2thetaleff_measurement_prediction[obs] = aux_sm.get(
+                observable_mapping[obs])
+            sin2thetaleff_measurement_para[obs] = {}
+            sin2thetaleff_measurement_para[obs][s2t_key] = aux_sm.derivative(
+                observable_mapping[obs], 'sin2thetaleff')
 
-    res, cov, param_res, para_cov = LINAfit.lina_fit(sin2thetaleff_measurement_names, measurement_central, sin2thetaleff_measurement_prediction, measurement_covariance, [s2t_key], sin2thetaleff_measurement_para)
-    sin2thetaleff=aux_sm.sin2thetaleff()+param_res[s2t_key]
-    sin2thetaleff_err=para_cov[s2t_key][s2t_key]**0.5
-    return sin2thetaleff,sin2thetaleff_err
+    res, cov, param_res, para_cov = LINAfit.lina_fit(sin2thetaleff_measurement_names, measurement_central,
+                                                     sin2thetaleff_measurement_prediction, measurement_covariance, [s2t_key], sin2thetaleff_measurement_para)
+    sin2thetaleff = aux_sm.sin2thetaleff()+param_res[s2t_key]
+    sin2thetaleff_err = para_cov[s2t_key][s2t_key]**0.5
+    return sin2thetaleff, sin2thetaleff_err
 
 
 def printModel(out, theo_err_treatment, para_err_treatment, sminputs, d6lin_type, d6quad_type, d8lin_type):
     """
     Prints the statistical model summary, including observed data, correlations, and error treatments.
     """
-    column_width=20
+    column_width = 20
     print('\n' + '*'*80)
     print('Statistical model:\n' + '='*80)
 
@@ -421,19 +431,23 @@ def runSMfit(names, sminputs, meas, meas_cov, pred, smparas, smpara):
     print('Analytic SM fit results:')
     header = ['Observable', 'Direct', '  +-',
               'Fit', '  +-', 'Indirect', '  +-', 'Pull']
-    postFitTable(width_const,header,names,meas,exp_err,fit_res,fit_cov,indirect,indirect_err)
+    postFitTable(width_const, header, names, meas, exp_err,
+                 fit_res, fit_cov, indirect, indirect_err)
 
-def postFitTable(width_const,header,names,meas,exp_err,fit_res,fit_cov,indirect,indirect_err):
-    
+
+def postFitTable(width_const, header, names, meas, exp_err, fit_res, fit_cov, indirect, indirect_err):
+
     print('='*len(header)*width_const)
     print(''.join([' '+x.ljust(width_const-1, ' ') for x in header]))
     print('-'*len(header)*width_const)
 
     for n in names:
-        exponent=5 if n=='Gmu' else 0
+        exponent = 5 if n == 'Gmu' else 0
         if n in fit_res:
-            rnd = -int(floor(log10(10**exponent*exp_err[n]))) + PRINTOUT_ROUNDING_LEVEL -1
-            print(''.join([(n+(' [10^{}]'.format(-exponent) if exponent!=0 else '')).ljust(width_const, ' ')] +
+            rnd = - \
+                int(floor(
+                    log10(10**exponent*exp_err[n]))) + PRINTOUT_ROUNDING_LEVEL - 1
+            print(''.join([(n+(' [10^{}]'.format(-exponent) if exponent != 0 else '')).ljust(width_const, ' ')] +
                           [('{:'+str(width_const)+'.' + str(max(rnd, 0)) + 'f}').format(round(10**exponent*x, rnd)) if isinstance(x, float) else x.rjust(width_const, ' ')
                            for x in [meas[n], exp_err[n], fit_res[n], fit_cov[n][n]**0.5, indirect[n], indirect_err[n]]]),
                   '{:6.1f}'.format(round((fit_res[n] - meas[n]) / exp_err[n], PRINTOUT_ROUNDING_LEVEL-1)))
@@ -449,12 +463,13 @@ def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoer
     exp_err = {n: meas_cov[n][n]**0.5 for n in meas_cov}
 
     # parametrize deviations from SM expectations in terms of pulls (relative to exp error), for better numerics
-    smdependence_para_pulls={}
+    smdependence_para_pulls = {}
     for o in smdependence_para:
-        smdependence_para_pulls[o]={}
+        smdependence_para_pulls[o] = {}
         for inp in smdependence_para[o]:
-            smdependence_para_pulls[o][inp+'_pull']=smdependence_para[o][inp]*exp_err[inp]
-            
+            smdependence_para_pulls[o][inp +
+                                       '_pull'] = smdependence_para[o][inp]*exp_err[inp]
+
     print('\nPerforming linear d6 EFT fits...\n')
 
     # One-at-a-time fit for each d6 coefficient
@@ -465,29 +480,28 @@ def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoer
             smdependence_para_pulls, theoerr_para, d6lin, [c]
         )
         err = abs(params_cov[c][c])**0.5
-        rnd = -int(floor(log10(err))) + PRINTOUT_ROUNDING_LEVEL -1 
-        print(c, round(params_res[c], rnd), '+-', round(err, rnd),end='')
-        importance={}
+        rnd = -int(floor(log10(err))) + PRINTOUT_ROUNDING_LEVEL - 1
+        print(c, round(params_res[c], rnd), '+-', round(err, rnd), end='')
+        importance = {}
         for n in names:
             if n not in full_cov or n not in d6lin:
                 continue
-            importance[n] = d6lin[n][c]**2 * err**2 / full_cov[n][n] 
+            importance[n] = d6lin[n][c]**2 * err**2 / full_cov[n][n]
             importance = dict(
                 sorted(importance.items(), key=lambda item: abs(item[1]), reverse=True))
         print(' -- mainly constrained by: ' +
               ', '.join([x for x in importance if abs(importance[x]) > 0.1]))
-
 
     # Multi-dimensional fit for all d6 coefficients
     fit_res, fit_cov, params_res, params_cov, directions, blind_directions, unconstrained = LINAfit.eft_fit(
         [n for n in names if n in full_cov], meas, full_cov, pred,
         smdependence_para_pulls, theoerr_para, d6lin, coefficients_d6, doevs=True
     )
-    
+
     print('\nMulti-dimensional fit (central, err, pull):\n')
     for ic, c in enumerate(params_res):
         err = abs(params_cov[c][c])**0.5
-        rnd = -int(floor(log10(err))) + PRINTOUT_ROUNDING_LEVEL -1
+        rnd = -int(floor(log10(err))) + PRINTOUT_ROUNDING_LEVEL - 1
         if directions is not None:
             print('Direction ', end='')
         print(f"{c}:", round(params_res[c], rnd), round(
@@ -496,7 +510,7 @@ def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoer
             print('')
         else:
             print('\n'+''.join(['{0:+}*{1}'.format(round(directions[ic][1][x], PRINTOUT_ROUNDING_LEVEL+1), x)
-                               for x in directions[ic][1] if round(abs(directions[ic][1][x]),PRINTOUT_ROUNDING_LEVEL+1) > 0.]))
+                               for x in directions[ic][1] if round(abs(directions[ic][1][x]), PRINTOUT_ROUNDING_LEVEL+1) > 0.]))
             importance = {}
             for n in names:
                 if n not in full_cov or n not in d6lin:
@@ -511,7 +525,7 @@ def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoer
             print('Mainly constrained by: ' +
                   ', '.join([x for x in importance if abs(importance[x]) > 0.2**0.5]))
             print()
-    #if blind_directions is not None:
+    # if blind_directions is not None:
     #    for d in blind_directions:
     #        print('Blind direction: ' + ''.join(['{0:+}*{1}'.format(
     #            round(d[1][x], PRINTOUT_ROUNDING_LEVEL), x) for x in d[1] if abs(d[1][x]) > 0.1]))
@@ -536,10 +550,11 @@ def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoer
 
     # Print the SMEFT fit results
     print('\nAnalytic SMEFT fit results:')
-    width_const=13
+    width_const = 13
     header = ['Observable', 'Direct', '  +-',
               'Fit', '  +-', 'Indirect', '  +-', 'Pull']
-    postFitTable(width_const,header,names,meas,exp_err,fit_res,fit_cov,indirect,indirect_err)
+    postFitTable(width_const, header, names, meas, exp_err,
+                 fit_res, fit_cov, indirect, indirect_err)
 
 
 if __name__ == '__main__':

@@ -4,6 +4,7 @@ import Utils
 EVCUTOFF = 1e5
 UNCONSTRAINEDCUTOFF = 1e-5
 
+
 def lina_fit(names, measured, predicted, covariance, parameters, parametrization, spectators=[], doevs=False, evcutoff=EVCUTOFF, unconstrainedcutoff=UNCONSTRAINEDCUTOFF):
     """
     Solves a chi2-fit of a linear parametrization with linear algebra.
@@ -71,8 +72,10 @@ def lina_fit(names, measured, predicted, covariance, parameters, parametrization
         # Convert eigenvalue sensitivities and directions into readable format
         evs = []
         for r in evs_list:
-            sorted_coeffs = sorted(zip(r[1].tolist(),params), key=lambda x: abs(x[0]), reverse=True)
-            evs.append((1 / abs(r[0]) ** 0.5, dict((x, y*(-1 if sorted_coeffs[0][0]<0 else 1)) for y,x in sorted_coeffs)))
+            sorted_coeffs = sorted(
+                zip(r[1].tolist(), params), key=lambda x: abs(x[0]), reverse=True)
+            evs.append((1 / abs(r[0]) ** 0.5, dict(
+                (x, y*(-1 if sorted_coeffs[0][0] < 0 else 1)) for y, x in sorted_coeffs)))
 
         sensitive_directions = []
         blind_directions = []

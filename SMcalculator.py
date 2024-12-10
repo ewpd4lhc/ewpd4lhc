@@ -566,10 +566,11 @@ class EWPOcalculator:
             getattr(self, '_update_' + name)(value)
 
         # Update derived values that are input to interpolation formulas
-        if self._scheme  == INPUTSCHEME.MW:
+        if self._scheme == INPUTSCHEME.MW:
             self._update_Deltaalpha_common(self._Deltaalpha_from_MW())
         elif self._scheme == INPUTSCHEME.sin2theta:
-            self._update_Deltaalpha_common(self._Deltaalpha_from_sin2thetaleff())
+            self._update_Deltaalpha_common(
+                self._Deltaalpha_from_sin2thetaleff())
         elif self._scheme == INPUTSCHEME.alphaMW:
             self._update_Gmu_common(self._Gmu_from_MW())
         elif self._scheme == INPUTSCHEME.alphasin2theta:
@@ -837,7 +838,7 @@ class EWPOcalculator:
                             observable_map[n]) * self.sin2theta_theoerr(observable_map[m])
         return dict(covariance)
 
-    # set defaults 
+    # set defaults
     def _set_input_values(self, MH, mt, alphas, MZ, Deltaalpha, Gmu, MW, sin2thetaleff, scheme, input_dict):
 
         # figure out scheme
@@ -858,7 +859,7 @@ class EWPOcalculator:
                     Gmu = GMU_DEFAULT
                 else:
                     raise Exception(
-                        "Need to select an input scheme or set two of {Gmu, Deltaalpha, MW, sin2thetaleff}")            
+                        "Need to select an input scheme or set two of {Gmu, Deltaalpha, MW, sin2thetaleff}")
             elif nEWinputs > 2:
                 raise Exception(
                     "Incompatible inputs, set only two of {Gmu, Deltaalpha, MW, sin2thetaleff}")

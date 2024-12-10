@@ -1,10 +1,12 @@
 import Utils
-import SMcalculator,LINAfit
+import SMcalculator
+import LINAfit
 import logging
 
 # Supported symmetries
-SUPPORTED_SYMMETRIES = ['general','top', 'topU3l', 'U35']
+SUPPORTED_SYMMETRIES = ['general', 'top', 'topU3l', 'U35']
 LFU_SYMMETRIES = ['topU3l', 'U35']
+
 
 class EWPDlikelihood:
     """
@@ -177,7 +179,7 @@ class EWPDlikelihood:
             for o1 in self.observables(incl_inputs):
                 for o2 in self.observables(incl_inputs):
                     res[o1][o2] += covd8[o1][o2]
-                    
+
         return self._normalize_cov(res) if normalized else res
 
     def correlation(self, incl_inputs=False, with_para_err=True, with_theo_err=True, with_d8_err=False):
@@ -352,7 +354,7 @@ class EWPDlikelihood:
 
         return list(inputs), res
 
-    def wilson_coefficients_d6(self,linonly=False):
+    def wilson_coefficients_d6(self, linonly=False):
         """
         Get the list of dimension-6 Wilson coefficients with non-zero impact.
 
@@ -363,12 +365,12 @@ class EWPDlikelihood:
         for o in self.observables():
             if self._d6linpara is not None:
                 for c in self._d6linpara[self._observable_mapping[o]]:
-                    if not c in res and self._d6linpara[self._observable_mapping[o]][c]!=0:
+                    if not c in res and self._d6linpara[self._observable_mapping[o]][c] != 0:
                         res.append(c)
             if not linonly and self._d6quadpara is not None:
                 if self._observable_mapping[o] in self._d6quadpara:
                     for c2 in self._d6quadpara[self._observable_mapping[o]]:
-                        if self._d6quadpara[self._observable_mapping[o]][c2]==0:
+                        if self._d6quadpara[self._observable_mapping[o]][c2] == 0:
                             continue
                         for c in c2.split('*'):
                             if not c in res:
@@ -386,25 +388,27 @@ class EWPDlikelihood:
         if self._d8linpara is not None:
             for o in self.observables():
                 for c in self._d8linpara[self._observable_mapping[o]]:
-                    if not c in res and self._d8linpara[self._observable_mapping[o]][c]!=0:
+                    if not c in res and self._d8linpara[self._observable_mapping[o]][c] != 0:
                         res.append(c)
         return res
-    
-    def _update_measurements(self,dataupdates):
+
+    def _update_measurements(self, dataupdates):
         for o in dataupdates:
             if not 'central' in dataupdates[o]:
-                raise Exception(f"Need to give central value for data update {o}")
+                raise Exception(
+                    f"Need to give central value for data update {o}")
             if not 'error' in dataupdates[o]:
                 raise Exception(f"Need to give error for data update {o}")
             if not o in self._all_measurement_names:
                 self._all_measurement_names.append(o)
                 self._measurement_covariance[o] = {}
                 if not 'prediction' in dataupdates[o]:
-                    raise Exception(f"Need to give prediction for data update {o}")
+                    raise Exception(
+                        f"Need to give prediction for data update {o}")
             self._measurement_central[o] = dataupdates[o]['central']
             self._measurement_covariance[o][o] = dataupdates[o]['error']**2
             if 'prediction' in dataupdates[o]:
-                if isinstance(dataupdates[o],(float,int)):
+                if isinstance(dataupdates[o], (float, int)):
                     self._fixed_prediction[o] = dataupdates[o]['prediction']
                     self._observable_mapping[o] = o
                 else:
@@ -454,4 +458,3 @@ class EWPDlikelihood:
             for o2 in d[o1]:
                 res[o1][o2] = d[o1][o2] / (pred[o1] * pred[o2])
         return res
-

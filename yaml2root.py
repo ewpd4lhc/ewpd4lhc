@@ -37,9 +37,9 @@ def make_workspace(outfn, yamldata, rescaling=False):
                 yamldata[o1]['error']*yamldata[o2]['error']
 
     if rescaling:
-        rescale={}
+        rescale = {}
         for o in yamldata:
-            rescale[o]=10**int(round(log10(1/yamldata[o]['error'])))
+            rescale[o] = 10**int(round(log10(1/yamldata[o]['error'])))
 
         for o in yamldata:
             yamldata[o]['smprediction'] *= rescale[o]
@@ -200,7 +200,7 @@ def make_workspace(outfn, yamldata, rescaling=False):
     if rescaling:
         print("In ROOT workspace, the following observables have been rescaled as follows for better numerical behaviour")
         for o in yamldata:
-            print('{}: {}'.format(o,rescale[o]))
+            print('{}: {}'.format(o, rescale[o]))
 
 
 def main():
