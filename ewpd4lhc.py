@@ -17,6 +17,7 @@ SUPPORTED_ERROR_TYPES = ['covariance', 'nuispar', 'off']
 SIN2THETAEEFF_DERIVED=['Ae','AFBe','sin2thetaeeff']
 SIN2THETALEFF_DERIVED=['Al','AFBl','sin2thetaleff']
 
+PRINTOUT_ROUNDING_LEVEL = 2
 
 def main():
     """
@@ -116,8 +117,7 @@ def main():
         normalized=normalize
     )
     # Filter Wilson coefficients based on user input
-    coefficients_d6 = [c for c in ewpd.wilson_coefficients_d6() if coefficients is None or c in coefficients]
-    coefficients_d8 = [c for c in ewpd.wilson_coefficients_d8() if coefficients is None or c in coefficients]
+    coefficients_d6_lin = [c for c in ewpd.wilson_coefficients_d6(linonly=True) if coefficients is None or c in coefficients]
 
     # d6 linear, quadratic, and d8 contributions if specified
     d6lin = ewpd.d6lin(normalized=normalize) if d6lin_type != 'none' else None
@@ -184,10 +184,10 @@ def main():
         eft_para_fit={}
         for o in d6lin:
             eft_para_fit[o]={}
-            for c in coefficients_d6:
+            for c in coefficients_d6_lin:
                 eft_para_fit[o][c] = d6lin[o][c] if c in d6lin[o] else 0
         runSMEFTfit(names, meas, meas_cov, full_cov, pred, 
-                    smdependence_para, theoerr_para, coefficients_d6, eft_para_fit)
+                    smdependence_para, theoerr_para, coefficients_d6_lin, eft_para_fit)
 
     printModel(out, theo_err_treatment, para_err_treatment,
                sminputs, d6lin_type, d6quad_type, d8lin_type)
@@ -329,7 +329,7 @@ def printModel(out, theo_err_treatment, para_err_treatment, sminputs, d6lin_type
     print(' '.join([x[:6].ljust(6, ' ') for x in [''] + list(out.keys())]))
     for oy in out:
         print(' '.join([oy[:6].ljust(
-            6, ' ')] + ['{:6.3f}'.format(round(out[ox]['correlation'][oy], 3)) for ox in out]))
+            6, ' ')] + ['{:6.3f}'.format(round(out[ox]['correlation'][oy], PRINTOUT_ROUNDING_LEVEL+1)) for ox in out]))
 
     print('='*80)
 
@@ -432,11 +432,11 @@ def postFitTable(width_const,header,names,meas,exp_err,fit_res,fit_cov,indirect,
     for n in names:
         exponent=5 if n=='Gmu' else 0
         if n in fit_res:
-            rnd = -int(floor(log10(10**exponent*exp_err[n]))) + 1
+            rnd = -int(floor(log10(10**exponent*exp_err[n]))) + PRINTOUT_ROUNDING_LEVEL -1
             print(''.join([(n+(' [10^{}]'.format(-exponent) if exponent!=0 else '')).ljust(width_const, ' ')] +
                           [('{:'+str(width_const)+'.' + str(max(rnd, 0)) + 'f}').format(round(10**exponent*x, rnd)) if isinstance(x, float) else x.rjust(width_const, ' ')
                            for x in [meas[n], exp_err[n], fit_res[n], fit_cov[n][n]**0.5, indirect[n], indirect_err[n]]]),
-                  '{:6.1f}'.format(round((fit_res[n] - meas[n]) / exp_err[n], 1)))
+                  '{:6.1f}'.format(round((fit_res[n] - meas[n]) / exp_err[n], PRINTOUT_ROUNDING_LEVEL-1)))
 
     print('='*len(header)*width_const)
 
@@ -464,9 +464,19 @@ def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoer
             [n for n in names if n in full_cov], meas, full_cov, pred,
             smdependence_para_pulls, theoerr_para, d6lin, [c]
         )
-        err = params_cov[c][c]**0.5
-        rnd = -int(floor(log10(err))) + 1
-        print(c, round(params_res[c], rnd), '+-', round(err, rnd))
+        err = abs(params_cov[c][c])**0.5
+        rnd = -int(floor(log10(err))) + PRINTOUT_ROUNDING_LEVEL -1 
+        print(c, round(params_res[c], rnd), '+-', round(err, rnd),end='')
+        importance={}
+        for n in names:
+            if n not in full_cov or n not in d6lin:
+                continue
+            importance[n] = d6lin[n][c]**2 * err**2 / full_cov[n][n] 
+            importance = dict(
+                sorted(importance.items(), key=lambda item: abs(item[1]), reverse=True))
+        print(' -- mainly constrained by: ' +
+              ', '.join([x for x in importance if abs(importance[x]) > 0.1]))
+
 
     # Multi-dimensional fit for all d6 coefficients
     fit_res, fit_cov, params_res, params_cov, directions, blind_directions, unconstrained = LINAfit.eft_fit(
@@ -476,17 +486,17 @@ def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoer
     
     print('\nMulti-dimensional fit (central, err, pull):\n')
     for ic, c in enumerate(params_res):
-        err = params_cov[c][c]**0.5
-        rnd = -int(floor(log10(err))) + 1
+        err = abs(params_cov[c][c])**0.5
+        rnd = -int(floor(log10(err))) + PRINTOUT_ROUNDING_LEVEL -1
         if directions is not None:
             print('Direction ', end='')
         print(f"{c}:", round(params_res[c], rnd), round(
-            err, rnd), round(params_res[c]/err, 1), end='\t')
+            err, rnd+1), round(params_res[c]/err, 1), end='\t')
         if directions is None:
             print('')
         else:
-            print('\n'+''.join(['{0:+}*{1}'.format(round(directions[ic][1][x], 3), x)
-                               for x in directions[ic][1] if abs(directions[ic][1][x]) > 0.0005]))
+            print('\n'+''.join(['{0:+}*{1}'.format(round(directions[ic][1][x], PRINTOUT_ROUNDING_LEVEL+1), x)
+                               for x in directions[ic][1] if round(abs(directions[ic][1][x]),PRINTOUT_ROUNDING_LEVEL+1) > 0.]))
             importance = {}
             for n in names:
                 if n not in full_cov or n not in d6lin:
@@ -499,13 +509,12 @@ def runSMEFTfit(names, meas, meas_cov, full_cov, pred, smdependence_para, theoer
             importance = dict(
                 sorted(importance.items(), key=lambda item: abs(item[1]), reverse=True))
             print('Mainly constrained by: ' +
-                  ', '.join([x for x in importance if abs(importance[x]) > 0.1**0.5]))
+                  ', '.join([x for x in importance if abs(importance[x]) > 0.2**0.5]))
             print()
-    # Handle blind directions if present
-    if blind_directions is not None:
-        for d in blind_directions:
-            print('Blind direction: ' + ''.join(['{0:+}*{1}'.format(
-                round(d[1][x], 2), x) for x in d[1] if abs(d[1][x]) > 0.1]))
+    #if blind_directions is not None:
+    #    for d in blind_directions:
+    #        print('Blind direction: ' + ''.join(['{0:+}*{1}'.format(
+    #            round(d[1][x], PRINTOUT_ROUNDING_LEVEL), x) for x in d[1] if abs(d[1][x]) > 0.1]))
 
     # Perform indirect fit for each observable
     indirect = {}
