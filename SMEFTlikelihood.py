@@ -55,7 +55,7 @@ class EWPDlikelihood:
             for o in observables:
                 if not o in self._all_measurement_names:
                     raise Exception(
-                        "No measurement for observable {}".format(o))
+                        "No measurement for input observable {}".format(o))
                 if self._observable_mapping[o] not in self._smpredictions.inputs():
                     self._observables.append(o)
 
@@ -352,7 +352,7 @@ class EWPDlikelihood:
 
         return list(inputs), res
 
-    def wilson_coefficients_d6(self):
+    def wilson_coefficients_d6(self,linonly=False):
         """
         Get the list of dimension-6 Wilson coefficients with non-zero impact.
 
@@ -365,7 +365,7 @@ class EWPDlikelihood:
                 for c in self._d6linpara[self._observable_mapping[o]]:
                     if not c in res and self._d6linpara[self._observable_mapping[o]][c]!=0:
                         res.append(c)
-            if self._d6quadpara is not None:
+            if not linonly and self._d6quadpara is not None:
                 if self._observable_mapping[o] in self._d6quadpara:
                     for c2 in self._d6quadpara[self._observable_mapping[o]]:
                         if self._d6quadpara[self._observable_mapping[o]][c2]==0:
