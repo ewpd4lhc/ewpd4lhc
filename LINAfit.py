@@ -1,8 +1,10 @@
 import numpy as np
 import Utils
 
+EVCUTOFF = 1e5
+UNCONSTRAINEDCUTOFF = 1e-5
 
-def lina_fit(names, measured, predicted, covariance, parameters, parametrization, spectators=[], doevs=False, evcutoff=1e5, unconstrainedcutoff=1e-2):
+def lina_fit(names, measured, predicted, covariance, parameters, parametrization, spectators=[], doevs=False, evcutoff=EVCUTOFF, unconstrainedcutoff=UNCONSTRAINEDCUTOFF):
     """
     Solves a chi2-fit of a linear parametrization with linear algebra.
 
@@ -61,17 +63,19 @@ def lina_fit(names, measured, predicted, covariance, parameters, parametrization
 
         # Its eigenvalues
         w, v = np.linalg.eigh(a)
-        evs = list(zip(w, np.transpose(v)))
+        evs_list = list(zip(w, np.transpose(v)))
 
         # Sort by eigenvalue, most sensitive direction first
-        evs.sort(reverse=True, key=lambda x: x[0])
+        evs_list.sort(reverse=True, key=lambda x: x[0])
 
         # Convert eigenvalue sensitivities and directions into readable format
-        evs = [(1 / abs(r[0]) ** 0.5, dict((x, y) for y, x in sorted(zip(r[1].tolist(),
-                params), key=lambda x: abs(x[0]), reverse=True))) for r in evs]
+        evs = []
+        for r in evs_list:
+            sorted_coeffs = sorted(zip(r[1].tolist(),params), key=lambda x: abs(x[0]), reverse=True)
+            evs.append((1 / abs(r[0]) ** 0.5, dict((x, y*(-1 if sorted_coeffs[0][0]<0 else 1)) for y,x in sorted_coeffs)))
+
         sensitive_directions = []
         blind_directions = []
-
         # Sort into blind and sensitive directions
         for e, v in evs:
             if e > evcutoff * evs[0][0]:
@@ -136,7 +140,7 @@ def lina_fit(names, measured, predicted, covariance, parameters, parametrization
         return dres, dcov, dparam_res, dpara_cov
 
 
-def lina_fit_with_nps(measurement_names, measurement_central, measurement_covariance, predictions, parameters, parametrization, nps, spectators=[], doevs=False):
+def lina_fit_with_nps(measurement_names, measurement_central, measurement_covariance, predictions, parameters, parametrization, nps, spectators=[], doevs=False, evcutoff=EVCUTOFF):
     """
     A lina fit with nuisance parameters (nps). The nuisance parameter dependence should already be part of the parametrization.
     Gaussian constraints are added for each nuisance parameter.
@@ -185,10 +189,10 @@ def lina_fit_with_nps(measurement_names, measurement_central, measurement_covari
         full_covariance[p][p] = 1.0
 
     # Call lina_fit to perform the full fit
-    return lina_fit(measurment_plus_np_names, central_values, predictions, full_covariance, parameters, actual_para, spectators, doevs=doevs)
+    return lina_fit(measurment_plus_np_names, central_values, predictions, full_covariance, parameters, actual_para, spectators, doevs=doevs, evcutoff=evcutoff)
 
 
-def eft_fit(names, central_values, covariance, predictions, sm_para, theoerr_para, eft_para, eft_paras, spectators=[], doevs=False):
+def eft_fit(names, central_values, covariance, predictions, sm_para, theoerr_para, eft_para, eft_paras, spectators=[], doevs=False, evcutoff=EVCUTOFF):
     """
     Fits the data using a linear EFT parametrization.
 
@@ -232,7 +236,7 @@ def eft_fit(names, central_values, covariance, predictions, sm_para, theoerr_par
 
     # Perform the fit using nuisance parameters (NPs)
     res = lina_fit_with_nps(names, central_values, covariance,
-                            predictions, parameters, para, nps, spectators, doevs)
+                            predictions, parameters, para, nps, spectators, doevs, evcutoff=evcutoff)
 
     # If EV analysis is performed, unpack the results accordingly
     if len(res) > 4:
