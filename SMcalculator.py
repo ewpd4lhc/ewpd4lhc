@@ -854,7 +854,7 @@ class EWPOcalculator:
                     "Need to select an input scheme or set two of {Gmu, Deltaalpha, MW, sin2thetaleff}")
             elif nEWinputs < 2:
                 if Gmu is None:
-                    logging.info("Using default Gmu of",GMU_DEFAULT)
+                    logging.info(f"Using default Gmu of {GMU_DEFAULT}")
                     Gmu = GMU_DEFAULT
                 else:
                     raise Exception(
