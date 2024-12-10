@@ -5,7 +5,7 @@ import numpy as np
 import logging
 logging.basicConfig(level=logging.INFO)
 
-
+# Definition of input parameter schemes
 class INPUTSCHEME(Enum):
     alpha = ['Deltaalpha', 'MZ', 'Gmu', 'MH', 'mt', 'alphas']
     MW = ['MW', 'MZ', 'Gmu', 'MH', 'mt', 'alphas']

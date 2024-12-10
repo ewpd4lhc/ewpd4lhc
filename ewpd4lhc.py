@@ -14,9 +14,12 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 # Allowed uncertainties (add to covariance, introduce nuisance parameter, ignore)
 SUPPORTED_ERROR_TYPES = ['covariance', 'nuispar', 'off']
+# Observable types depending on sin2thetaleff only
 SIN2THETAEEFF_DERIVED = ['Ae', 'AFBe', 'sin2thetaeeff']
+# Observable types depending on sin2thetaeeff only (no LFU case)
 SIN2THETALEFF_DERIVED = ['Al', 'AFBl', 'sin2thetaleff']
 
+# Some control of rounding of output, default value is 2, others might not work quite as well
 PRINTOUT_ROUNDING_LEVEL = 2
 
 
@@ -57,6 +60,7 @@ def main():
     scheme, symmetry, observables, sminputs, coefficients, Lambda, d6lin_type, d6quad_type, d8lin_type, theo_err_treatment, para_err_treatment, datapath = readCfg(
         args)
 
+    # If sin2theta_l^eff is EW input parameter, its value is determined from data
     if 'sin2theta' in scheme:
         lfu = symmetry in SMEFTlikelihood.LFU_SYMMETRIES
         measurement_names, measurement_central, measurement_covariance, observable_mapping, fixed_prediction = Utils.load_data(
@@ -215,7 +219,6 @@ def main():
         import yaml2root
         yaml2root.make_workspace(root_output, out, rescale_root)
 
-
 def readCfg(args):
     """
     Reads the configuration file and command-line arguments for setting up the EWPD fit.
@@ -284,6 +287,10 @@ def readCfg(args):
 
 
 def determine_sin2thetaleff(measurement_names, measurement_central, measurement_covariance, observable_mapping, scheme, lfu):
+    """
+    Determines sin2thetaleff from observables depending on sin2thetaleff only.    
+    """
+
     if lfu:
         sin2thetaleff_obs = SIN2THETALEFF_DERIVED
     else:

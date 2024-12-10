@@ -1,7 +1,11 @@
 import numpy as np
 import Utils
 
+# Cutoff for eigenvector with lowest eigenvalue considered, relative to largest EV.
+# Ensures numerical noise in not considered as independent constraint.
+# Needs to be increased in certain situations.
 EVCUTOFF = 1e5
+# A direction is considered unconstrained if relative size of projection on blind direction is smaller than this.
 UNCONSTRAINEDCUTOFF = 1e-5
 
 
@@ -18,8 +22,8 @@ def lina_fit(names, measured, predicted, covariance, parameters, parametrization
     parametrization (dict): Dictionary describing how the observables depend on the parameters.
     spectators (list): List of observables to be treated as spectators (ignored in fit). Default is [].
     doevs (bool): Whether to perform an eigenvalue (EV) analysis. Default is False. 
-    evcutoff (float): Cutoff for eigenvector with lowest eigenvalue considered. Default is 1e5.
-    unconstrainedcutoff (float): Cutoff for Observables considered unconstrained as they align with blind direction. Default is 1e-2.
+    evcutoff (float): Cutoff for eigenvector with lowest eigenvalue considered. 
+    unconstrainedcutoff (float): Cutoff for observables considered unconstrained as they align with blind direction.
 
     Returns:
     Tuple containing:
