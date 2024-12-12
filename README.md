@@ -2,9 +2,12 @@
 
 This code creates a SMEFT likelihood for EWPD (Z pole and W pole observables), taylored to the needs of the LHC collaborations.
 
+See also:
+[https://arxiv.org/abs/2412.07651](https://arxiv.org/abs/2412.07651)
+
 * Supports not only the {alpha,MZ,GF} input scheme but also {MW,MZ,GF} (preferred at LHC), {alpha,MZ,MW},  {sin2theta,MZ,GF}, {alpha,MZ,sin2theta} 
 * Dynamically calculates state-of-the art SM predictions from input parameters
-* Includes of parametric and theory uncertainties as well as their correlated effect
+* Includes parametric and theory uncertainties as well as their correlated effect
 * Loads flexible EFT parametrizations from text files
 * Parametrizations with dimension-eight as well as NLO perturbative contributions are included (up to 5 input parameter schemes)
 * Baseline parametrization and notation is based on SMEFTsim, with other parametrizations validated against it
@@ -123,7 +126,7 @@ The experimental correlation of Refs [^1], [^2] is taken into account and noted 
 
 For alphaS the value is taken from lattic calculation [^5], according to recommendation in Ref. [^6]
 
-The full list of observables currently implemented can be understood from the `data` files.
+The full list of observables currently implemented can be understood from the `data` files, which contain further references.
 
 ### SM prediction
 
@@ -151,11 +154,6 @@ Theoretical uncertainties are also modelled with nuisance parameters that shift 
 
 The second method is to add them to the experimental covariance.
 In that case the model is simpler, the covariance does not encompas SM inputs and the no nuisance parameters are introduced.
-The parametric (or similar the theory) covariance $ C^{param}_{ij} $ of two observables $O_i$ and $O_j$ is calcuated as
-$C^{param}_{ij} = \sum_{k} C^{param,k}_{ij}$
-where
-$C^{param,k}_{ij} = (dO_i/dO_k)\times\sigma_k\times(dO_j/dO_jk)\times\sigma_k$, 
-$\sigma_k$ is the uncertainty in the input parameter $k$, and $dO_i/dO_k$ the analytically calculated partial derivate.
 The total covariance is the sum of experimental, parametric, and theory uncertainty covariance.
 
 The calculation of the above covariance has been validated as follows. Based on the experimental covariance 10 M pseudo data sets have been created. For each the difference between SM prediction (based on the five inputs) and pseudo observation is calculated. The covariance of the ensemble and the analytical calculation described above agree almost perfectly, with permille-level difference that can be attributed to non-linear effects.
@@ -165,13 +163,12 @@ In particular the relatively large uncertainty on MW scheme introduces, in the M
 #### SM fit 
 
 To validate the inputs and the implementation of SM prediction formulas, an analytic SM fit is performed automatically when running the tool, using the configured variable list (+SM inputs).
-The SM parametrizations are used in the linear approximation, which is sufficient in most cases, except for the indirect determination of the Higgs mass, where non-linear effects are important due to the low precision.
+The SM parametrizations are used in the linear approximation, which is sufficient in most cases.
 
 
 ### SMEFT parametrization
 
 It is possible to choose from three parametrizations. There is also the option to mix parametrizations, e.g. taking linear dimension-six effects from SMEFTsim and only higher-order effects from EWPD2dim8.
-The parametrizations generally agree within 10% for linear dimension-six predictions (the only level at which they are comparable).
 
 #### SMEFTsim
 Parametrizations extracted from the SMEFTsim 3.0 model [^14].
@@ -181,6 +178,13 @@ Features: Both MW and alpha schemes and all symmetries, all variables. Dimension
 The parametrizations for W and Z bosons have been derived from SMEFTsim 3.0 by generating calculating polarized decay rates in MadGraph5_aMCatNLO [^15]. Shifts in MW and alpha have been extracted from the UFO model.
 The advantage of this parametrization is small numerical uncertainties and the option to include "quadratic terms", which are partial 1/Lambda^4 contributions that are typically included LHC interpretations.
 
+#### EWPDatNLO
+Analytic parametrization kindly provided by Anke Biekötte et al [^16], numerical parametrization obtained using SMEFTsim default input values.
+
+Features: Five symmetries, all variables. Dimension-six terms only.
+
+NLO corrections modify the values of coefficients appearing at LO and introduce additional coefficients.
+
 #### EWPD2dim8
 Parametrization extracted from the tables in "EWPD to dimension eight" [^13].
 
@@ -189,13 +193,6 @@ Features: Both schemes and all symmetries, Z pole variables only. Dimension-six,
 Parametrizations have been calculated from the tables in Ref [^13] and converted to various symmetries.
 There is also the option to include quadratic terms. Compared to SMEFTsim additional terms quadratic in dimenson six Wilson coefficients are taken into account.
 The only parametrizations that includes dimension eight contributions. Relatively small numerical precision due to the presentation of numbers.
-
-#### EWPDatNLO
-Parametrization taken from the supplementary material to "Electroweak and QCD corrections to Z and W pole observables in the SMEFT" [^16]
-
-Features: Only alpha scheme and U35 symmetry, all variables. Dimension-six terms only.
-
-The only parametrization with NLO perturbative corrections. NLO corrections modify the values of coefficients appearing at LO and introduce additional coefficients.
 
 
 ## References
@@ -230,7 +227,7 @@ The only parametrization with NLO perturbative corrections. NLO corrections modi
 
 [^15]: J. Alwall, R. Frederix, S. Frixione, V. Hirschi, F. Maltoni, O. Mattelaer, H. S. Shao, T. Stelzer, P. Torrielli and M. Zaro, "The automated computation of tree-level and next-to-leading order differential cross sections, and their matching to parton shower simulations," JHEP 07 (2014), 079 [https://arxiv.org/abs/1405.0301]
 
-[^16]: S. Dawson and P. P. Giardino, "Electroweak and QCD corrections to $Z$ and $W$ pole observables in the standard model EFT," Phys. Rev. D 101 (2020) no.1, 013001 [https://arxiv.org/abs/1909.02000]
+[^16]: A. Biekötter, B. D. Pecjak and T.~Smith, "Using the effective weak mixing angle as an input parameter in SMEFT," JHEP 04 (2024), 073 [https://arxiv.org/abs/2312.08446]
 
 [^17]: W. Verkerke and D. P. Kirkby, "The RooFit toolkit for data modeling," eConf C0303241 (2003), MOLT007 [https://arxiv.org/abs/physics/0306116]
 
